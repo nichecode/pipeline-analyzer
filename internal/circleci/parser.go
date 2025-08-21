@@ -6,20 +6,40 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/nichecode/pipeline-analyzer/internal/shared"
 	"gopkg.in/yaml.v3"
 )
 
 // ParseConfig parses a CircleCI config file
 func ParseConfig(configPath string) (*Config, error) {
+	logger := shared.GetLogger()
+	logger.Debug("CircleCI", "Starting config parsing", map[string]interface{}{
+		"file": configPath,
+	})
+
 	data, err := os.ReadFile(configPath)
 	if err != nil {
+		logger.Error("CircleCI", "Failed to read config file", map[string]interface{}{
+			"file":  configPath,
+			"error": err.Error(),
+		})
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	var config Config
 	if err := yaml.Unmarshal(data, &config); err != nil {
+		logger.ParseError("CircleCI", configPath, err, string(data))
 		return nil, fmt.Errorf("failed to parse YAML: %w", err)
 	}
+
+	logger.Info("CircleCI", "Config parsed successfully", map[string]interface{}{
+		"file":      configPath,
+		"version":   config.Version,
+		"jobs":      len(config.Jobs),
+		"workflows": len(config.Workflows),
+		"executors": len(config.Executors),
+		"orbs":      len(config.Orbs),
+	})
 
 	return &config, nil
 }

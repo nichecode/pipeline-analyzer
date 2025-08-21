@@ -22,12 +22,31 @@ func NewAnalyzer() *Analyzer {
 
 // AnalyzeWorkflow analyzes a GitHub Actions workflow
 func (a *Analyzer) AnalyzeWorkflow(filePath string) (*AnalysisResult, error) {
+	logger := shared.GetLogger()
+	logger.Debug("GitHubActions", "Starting workflow analysis", map[string]interface{}{
+		"file": filePath,
+	})
+
 	workflow, err := a.parser.ParseFile(filePath)
 	if err != nil {
+		logger.Error("GitHubActions", "Failed to parse workflow", map[string]interface{}{
+			"file":  filePath,
+			"error": err.Error(),
+		})
 		return nil, fmt.Errorf("failed to parse workflow: %v", err)
 	}
 
-	return a.analyzeWorkflowData(workflow, filePath), nil
+	result := a.analyzeWorkflowData(workflow, filePath)
+	
+	logger.Info("GitHubActions", "Workflow analyzed successfully", map[string]interface{}{
+		"file":       filePath,
+		"jobs":       len(result.Jobs),
+		"steps":      result.TotalSteps,
+		"actions":    len(result.ActionUsage),
+		"runners":    len(result.RunnerUsage),
+	})
+
+	return result, nil
 }
 
 // analyzeWorkflowData performs the actual analysis

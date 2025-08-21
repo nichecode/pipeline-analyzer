@@ -9,6 +9,7 @@ import (
 	"github.com/nichecode/pipeline-analyzer/internal/circleci"
 	"github.com/nichecode/pipeline-analyzer/internal/githubactions"
 	"github.com/nichecode/pipeline-analyzer/internal/gotask"
+	"github.com/nichecode/pipeline-analyzer/internal/shared"
 )
 
 // AnalysisResult represents the result of analyzing a build tool
@@ -58,6 +59,9 @@ func (a *Analyzer) AnalyzeAll() ([]AnalysisResult, error) {
 
 // analyzeTool analyzes a specific build tool
 func (a *Analyzer) analyzeTool(tool BuildTool) AnalysisResult {
+	logger := shared.GetLogger()
+	logger.DiscoveryInfo(tool.Type, tool.ConfigPath, "Starting tool analysis")
+
 	result := AnalysisResult{
 		Tool: tool,
 	}
@@ -67,7 +71,12 @@ func (a *Analyzer) analyzeTool(tool BuildTool) AnalysisResult {
 	
 	// Verify config file exists
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		result.Error = fmt.Sprintf("config file not found: %s", configPath)
+		errMsg := fmt.Sprintf("config file not found: %s", configPath)
+		logger.Error("Discovery", errMsg, map[string]interface{}{
+			"tool_type":   tool.Type,
+			"config_path": configPath,
+		})
+		result.Error = errMsg
 		return result
 	}
 
@@ -80,34 +89,42 @@ func (a *Analyzer) analyzeTool(tool BuildTool) AnalysisResult {
 	case "circleci":
 		err := a.analyzeCircleCI(configPath, outputDir)
 		if err != nil {
+			logger.AnalysisError(tool.Type, configPath, err)
 			result.Error = err.Error()
 		} else {
 			result.Success = true
+			logger.DiscoveryInfo(tool.Type, configPath, "Analysis completed successfully")
 		}
 
 	case "gotask":
 		err := a.analyzeGoTask(configPath, outputDir)
 		if err != nil {
+			logger.AnalysisError(tool.Type, configPath, err)
 			result.Error = err.Error()
 		} else {
 			result.Success = true
+			logger.DiscoveryInfo(tool.Type, configPath, "Analysis completed successfully")
 		}
 
 	case "github-actions":
 		err := a.analyzeGitHubActions(configPath, outputDir)
 		if err != nil {
+			logger.AnalysisError(tool.Type, configPath, err)
 			result.Error = err.Error()
 		} else {
 			result.Success = true
+			logger.DiscoveryInfo(tool.Type, configPath, "Analysis completed successfully")
 		}
 
 	default:
 		// For now, we'll create a basic analysis for unsupported tools
 		err := a.analyzeGeneric(tool, outputDir)
 		if err != nil {
+			logger.AnalysisError(tool.Type, configPath, err)
 			result.Error = err.Error()
 		} else {
 			result.Success = true
+			logger.DiscoveryInfo(tool.Type, configPath, "Generic analysis completed")
 		}
 	}
 

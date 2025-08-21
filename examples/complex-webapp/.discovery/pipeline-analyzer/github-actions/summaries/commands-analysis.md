@@ -4,11 +4,11 @@
 
 ### npm (6 commands)
 
-- `npm run build:prod`
-- `npm audit --audit-level=moderate`
 - `npm ci`
 - `npm run lint`
 - `npm run test:coverage`
+- `npm run build:prod`
+- `npm audit --audit-level=moderate`
 
 ### pip (2 commands)
 

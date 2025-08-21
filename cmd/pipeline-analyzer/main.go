@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/nichecode/pipeline-analyzer/internal/discovery"
+	"github.com/nichecode/pipeline-analyzer/internal/shared"
 )
 
 var (
@@ -19,8 +20,22 @@ func main() {
 		repoPath    = flag.String("path", ".", "Path to repository root (default: current directory)")
 		showVersion = flag.Bool("version", false, "Show version information")
 		help        = flag.Bool("help", false, "Show help")
+		debug       = flag.Bool("debug", false, "Enable debug logging")
+		logDir      = flag.String("log-dir", "", "Directory to write log files (default: no file logging)")
 	)
 	flag.Parse()
+
+	// Initialize logging based on flags
+	logLevel := shared.LogLevelInfo
+	if *debug {
+		logLevel = shared.LogLevelDebug
+	}
+	
+	if err := shared.InitLogger(logLevel, *logDir); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to initialize logger: %v\n", err)
+		// Continue without file logging
+	}
+	defer shared.GetLogger().Close()
 
 	if *showVersion {
 		fmt.Printf("pipeline-analyzer %s (built %s)\n", version, buildTime)
@@ -147,7 +162,14 @@ func printUsage() {
 	fmt.Printf("EXAMPLES:\n")
 	fmt.Printf("  pipeline-analyzer                    # Analyze current directory\n")
 	fmt.Printf("  pipeline-analyzer /path/to/repo     # Analyze specific repository\n")
-	fmt.Printf("  pipeline-analyzer ../my-project     # Analyze relative path\n\n")
+	fmt.Printf("  pipeline-analyzer ../my-project     # Analyze relative path\n")
+	fmt.Printf("  pipeline-analyzer --debug --log-dir=logs /repo  # Enable debug logging\n\n")
+	
+	fmt.Printf("OPTIONS:\n")
+	fmt.Printf("  --debug                             Enable debug logging output\n")
+	fmt.Printf("  --log-dir=<directory>               Write detailed logs to specified directory\n")
+	fmt.Printf("  --version                           Show version information\n")
+	fmt.Printf("  --help                              Show this help message\n\n")
 
 	fmt.Printf("SUPPORTED BUILD TOOLS:\n")
 	fmt.Printf("  - CircleCI (.circleci/config.yml)\n")

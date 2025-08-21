@@ -7,30 +7,63 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/nichecode/pipeline-analyzer/internal/shared"
 	"gopkg.in/yaml.v3"
 )
 
 // ParseTaskfile parses a Taskfile.yml file with error recovery
 func ParseTaskfile(taskfilePath string) (*Taskfile, error) {
+	logger := shared.GetLogger()
+	logger.Debug("GoTask", "Starting taskfile parsing", map[string]interface{}{
+		"file": taskfilePath,
+	})
+
 	data, err := os.ReadFile(taskfilePath)
 	if err != nil {
+		logger.Error("GoTask", "Failed to read taskfile", map[string]interface{}{
+			"file":  taskfilePath,
+			"error": err.Error(),
+		})
 		return nil, fmt.Errorf("failed to read taskfile: %w", err)
 	}
 
 	var taskfile Taskfile
 	if err := yaml.Unmarshal(data, &taskfile); err != nil {
+		logger.Warn("GoTask", "Standard YAML parsing failed, attempting recovery", map[string]interface{}{
+			"file":  taskfilePath,
+			"error": err.Error(),
+		})
+		
 		// Try to parse with more lenient approach
-		if recoveredTaskfile, recoverErr := parseTaskfileWithRecovery(data); recoverErr == nil {
+		if recoveredTaskfile, recoverErr := parseTaskfileWithRecovery(data, taskfilePath); recoverErr == nil {
+			logger.RecoveryAttempt("GoTask", taskfilePath, "flexible_parsing", true)
 			return recoveredTaskfile, nil
+		} else {
+			logger.RecoveryAttempt("GoTask", taskfilePath, "flexible_parsing", false)
 		}
+		
+		// Log detailed parsing error
+		logger.ParseError("GoTask", taskfilePath, err, string(data))
 		return nil, fmt.Errorf("failed to parse YAML: %w", err)
 	}
+
+	logger.Info("GoTask", "Taskfile parsed successfully", map[string]interface{}{
+		"file":      taskfilePath,
+		"version":   taskfile.Version,
+		"tasks":     len(taskfile.Tasks),
+		"includes":  len(taskfile.Includes),
+		"vars":      len(taskfile.Vars),
+	})
 
 	return &taskfile, nil
 }
 
 // parseTaskfileWithRecovery attempts to parse with basic structure recovery
-func parseTaskfileWithRecovery(data []byte) (*Taskfile, error) {
+func parseTaskfileWithRecovery(data []byte, taskfilePath string) (*Taskfile, error) {
+	logger := shared.GetLogger()
+	logger.Debug("GoTask", "Attempting recovery parsing", map[string]interface{}{
+		"file": taskfilePath,
+	})
 	// Parse as raw interface{} first to check structure
 	var raw map[string]interface{}
 	if err := yaml.Unmarshal(data, &raw); err != nil {

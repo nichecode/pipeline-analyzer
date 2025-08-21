@@ -53,7 +53,7 @@ type DockerConfig struct {
 	Image       string                 `yaml:"image"`
 	Name        string                 `yaml:"name"`
 	Entrypoint  []string               `yaml:"entrypoint"`
-	Command     []string               `yaml:"command"`
+	Command     interface{}            `yaml:"command"`
 	User        string                 `yaml:"user"`
 	Environment map[string]interface{} `yaml:"environment"`
 	Auth        map[string]interface{} `yaml:"auth"`

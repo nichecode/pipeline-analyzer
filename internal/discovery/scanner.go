@@ -173,7 +173,18 @@ func (s *Scanner) discoverBuildTools() ([]BuildTool, error) {
 			}
 
 			// Create unique key for deduplication
-			toolKey := pattern.toolType + ":" + file
+			var toolKey string
+			var configPath string
+			
+			// Special handling for GitHub Actions - group all workflows under one entry
+			if pattern.toolType == "github-actions" {
+				toolKey = "github-actions"
+				configPath = filepath.Dir(file) // Use .github/workflows directory
+			} else {
+				toolKey = pattern.toolType + ":" + file
+				configPath = file
+			}
+			
 			if foundTools[toolKey] {
 				continue
 			}
@@ -182,7 +193,7 @@ func (s *Scanner) discoverBuildTools() ([]BuildTool, error) {
 			tools = append(tools, BuildTool{
 				Type:        pattern.toolType,
 				Name:        pattern.name,
-				ConfigPath:  file,
+				ConfigPath:  configPath,
 				Description: pattern.description,
 			})
 		}

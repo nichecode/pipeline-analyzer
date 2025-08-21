@@ -131,10 +131,19 @@ func analyzeVariables(taskfile *Taskfile, analysis *Analysis) {
 
 // analyzeIncludes analyzes included taskfiles
 func analyzeIncludes(taskfile *Taskfile, analysis *Analysis) {
-	for name, include := range taskfile.Includes {
+	for name, includeRaw := range taskfile.Includes {
 		includeAnalysis := &IncludeAnalysis{
-			Path:      include.Taskfile,
 			Namespace: name,
+		}
+		
+		// Handle different include formats (string or object)
+		switch include := includeRaw.(type) {
+		case string:
+			includeAnalysis.Path = include
+		case map[string]interface{}:
+			if taskfile, ok := include["taskfile"].(string); ok {
+				includeAnalysis.Path = taskfile
+			}
 		}
 		
 		// Try to parse included taskfile for deeper analysis

@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ParseTaskfile parses a Taskfile.yml file
+// ParseTaskfile parses a Taskfile.yml file with error recovery
 func ParseTaskfile(taskfilePath string) (*Taskfile, error) {
 	data, err := os.ReadFile(taskfilePath)
 	if err != nil {
@@ -19,10 +19,91 @@ func ParseTaskfile(taskfilePath string) (*Taskfile, error) {
 
 	var taskfile Taskfile
 	if err := yaml.Unmarshal(data, &taskfile); err != nil {
+		// Try to parse with more lenient approach
+		if recoveredTaskfile, recoverErr := parseTaskfileWithRecovery(data); recoverErr == nil {
+			return recoveredTaskfile, nil
+		}
 		return nil, fmt.Errorf("failed to parse YAML: %w", err)
 	}
 
 	return &taskfile, nil
+}
+
+// parseTaskfileWithRecovery attempts to parse with basic structure recovery
+func parseTaskfileWithRecovery(data []byte) (*Taskfile, error) {
+	// Parse as raw interface{} first to check structure
+	var raw map[string]interface{}
+	if err := yaml.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	taskfile := &Taskfile{}
+	
+	// Safely extract version
+	if version, ok := raw["version"].(string); ok {
+		taskfile.Version = version
+	}
+	
+	// Safely extract includes with flexible typing
+	if includesRaw, ok := raw["includes"]; ok {
+		taskfile.Includes = make(map[string]interface{})
+		if includesMap, ok := includesRaw.(map[string]interface{}); ok {
+			taskfile.Includes = includesMap
+		}
+	}
+	
+	// Safely extract vars
+	if varsRaw, ok := raw["vars"]; ok {
+		if varsMap, ok := varsRaw.(map[string]interface{}); ok {
+			taskfile.Vars = varsMap
+		}
+	}
+	
+	// Safely extract tasks
+	if tasksRaw, ok := raw["tasks"]; ok {
+		taskfile.Tasks = make(map[string]Task)
+		if tasksMap, ok := tasksRaw.(map[string]interface{}); ok {
+			for taskName, taskRaw := range tasksMap {
+				if taskMap, ok := taskRaw.(map[string]interface{}); ok {
+					task := parseTaskFromMap(taskMap)
+					taskfile.Tasks[taskName] = task
+				}
+			}
+		}
+	}
+	
+	return taskfile, nil
+}
+
+// parseTaskFromMap safely parses a task from a map
+func parseTaskFromMap(taskMap map[string]interface{}) Task {
+	task := Task{}
+	
+	if desc, ok := taskMap["desc"].(string); ok {
+		task.Desc = desc
+	}
+	
+	if cmdsRaw, ok := taskMap["cmds"]; ok {
+		task.Cmds = []interface{}{}
+		switch cmds := cmdsRaw.(type) {
+		case []interface{}:
+			task.Cmds = cmds
+		case string:
+			task.Cmds = []interface{}{cmds}
+		}
+	}
+	
+	if depsRaw, ok := taskMap["deps"]; ok {
+		task.Deps = []interface{}{}
+		switch deps := depsRaw.(type) {
+		case []interface{}:
+			task.Deps = deps
+		case string:
+			task.Deps = []interface{}{deps}
+		}
+	}
+	
+	return task
 }
 
 // ExtractTaskCommands extracts all commands from a task

@@ -7,7 +7,7 @@ type Taskfile struct {
 	Version   string                    `yaml:"version"`
 	Output    interface{}               `yaml:"output"`
 	Method    string                    `yaml:"method"`
-	Includes  map[string]Include        `yaml:"includes"`
+	Includes  map[string]interface{}    `yaml:"includes"`
 	Vars      map[string]interface{}    `yaml:"vars"`
 	Env       map[string]interface{}    `yaml:"env"`
 	Tasks     map[string]Task           `yaml:"tasks"`

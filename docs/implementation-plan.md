@@ -55,35 +55,47 @@ pipeline-analyzer/
    - ExtractJobs(config) - get all unique job definitions
    - AnalyzeJobCommands(job) - extract run commands and patterns
    - ClassifyCommands(commands) - docker, scripts, npm, etc.
+   - CountSpecificPatterns(commands) - docker-compose, docker run, script calls per job
+   - ExtractCommandWords(commands) - first word of each command for frequency analysis
 
 6. **Workflow analysis**
    - ExtractWorkflows(config) 
    - AnalyzeJobDependencies(workflow) - requires analysis
    - CountJobUsage(workflows) - frequency analysis
 
-7. **Cross-job analysis**
+7. **Executors and Docker images analysis**
+   - ExtractExecutors(config) - get executor definitions
+   - AnalyzeJobImages(job) - extract Docker images and executors per job
+   - CreateImageUsageTable(jobs) - table of job to image/executor mapping
+
+8. **Cross-job analysis**
    - Create internal/analysis/ package
    - FindCommonPatterns(jobs) - shared command patterns
    - IdentifySharedDependencies(workflows) - jobs that others depend on
    - GenerateUsageStats(jobs, workflows) - usage frequency
+   - CountCommandPatterns(jobs) - detailed counting (docker, scripts, npm per job)
+   - GenerateCommandFrequencyTable(jobs) - most common command patterns
 
 ### Phase 3: Markdown Generation
 **Goal:** Generate the interconnected documentation files
 
 **Prompts:**
-8. **Markdown templates and generators**
+9. **Markdown templates and generators**
    - Create internal/markdown/generator.go
    - GenerateJobMarkdown(job) - individual job files
    - GenerateWorkflowMarkdown(workflow) - workflow files
    - Template functions for consistent navigation links
 
-9. **Summary generators**
-   - GenerateJobUsageMarkdown(analysis)
-   - GenerateCommandsAnalysisMarkdown(analysis)
-   - GenerateAllJobsIndex(jobs)
-   - GenerateMigrationChecklist(analysis)
+10. **Summary generators**
+    - GenerateJobUsageMarkdown(analysis)
+    - GenerateCommandsAnalysisMarkdown(analysis)
+    - GenerateAllJobsIndex(jobs)
+    - GenerateExecutorsAndImagesMarkdown(analysis)
+    - GenerateDockerAndScriptsMarkdown(analysis) - grep-like pattern detection
+    - GenerateMigrationChecklist(analysis)
+    - Include raw YAML sections in job/workflow markdown for reference
 
-10. **Main README and navigation**
+11. **Main README and navigation**
     - GenerateMainReadme(analysis) - overview with stats
     - Ensure all cross-references work correctly
     - Generate directory structure with proper links
@@ -92,18 +104,18 @@ pipeline-analyzer/
 **Goal:** Auto-generate go-task files from CircleCI analysis
 
 **Prompts:**
-11. **go-task types and structure**
+12. **go-task types and structure**
     - Create internal/gotask/types.go
     - Define Task, Taskfile structures matching go-task schema
     - Handle the functional grouping (build.yml, test.yml, etc.)
 
-12. **Task generation logic**
+13. **Task generation logic**
     - Create internal/gotask/generator.go
     - ConvertJobToTask(job) - transform CircleCI job to go-task
     - GroupTasksByFunction(tasks) - organize into functional files
     - GenerateTaskfileYAML(tasks) - output proper YAML
 
-13. **Template system for go-task**
+14. **Template system for go-task**
     - Create internal/gotask/template.go
     - Templates for main Taskfile.yml (orchestrator)
     - Templates for functional groups (build.yml, test.yml, etc.)
@@ -113,18 +125,18 @@ pipeline-analyzer/
 **Goal:** Bring it all together with a clean CLI interface
 
 **Prompts:**
-14. **Command structure and flags**
+15. **Command structure and flags**
     - Enhance cmd/analyze/main.go
     - Add flags: --config, --output-dir, --generate-tasks
     - Basic error handling and user feedback
 
-15. **End-to-end integration**
+16. **End-to-end integration**
     - Wire all components together
     - Test with real CircleCI config
     - Ensure output matches bash script functionality
     - Add basic validation
 
-16. **Polish and documentation**
+17. **Polish and documentation**
     - Add usage examples
     - Handle edge cases discovered during testing
     - Basic performance improvements if needed

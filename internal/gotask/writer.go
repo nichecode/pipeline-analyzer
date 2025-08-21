@@ -250,7 +250,7 @@ func generateIncludeMarkdown(includeName string, includeAnalysis *IncludeAnalysi
 			if len(taskAnalysis.Commands) > 0 {
 				content += "**Commands:**\n\n"
 				for i, command := range taskAnalysis.Commands {
-					content += fmt.Sprintf("Command 1 %d. \n\n", i+1)
+					content += fmt.Sprintf("Command %d. \n\n", i+1)
 					content += fmt.Sprintf("```bash\n%s\n```\n\n", command)
 				}
 			} else if len(taskAnalysis.Dependencies) > 0 {

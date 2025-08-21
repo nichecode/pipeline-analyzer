@@ -1,6 +1,6 @@
 # Go-Task Analysis Report
 
-**Generated:** 2025-08-21T10:04:30+01:00
+**Generated:** 2025-08-21T10:18:49+01:00
 **Taskfile:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/Taskfile.yml
 
 ## 📊 Overview
@@ -64,14 +64,14 @@ Individual task analysis with commands and optimization opportunities:
 | build-docker | 4 tasks | [View](tasks/build-docker.md) |
 | install-backend | 4 tasks | [View](tasks/install-backend.md) |
 | install-frontend | 4 tasks | [View](tasks/install-frontend.md) |
-| build | 2 tasks | [View](tasks/build.md) |
+| test | 2 tasks | [View](tasks/test.md) |
 | start-services | 2 tasks | [View](tasks/start-services.md) |
 
 ### Top Optimization Opportunities
 
-- ⚠️ **deploy-staging**: Task could benefit from caching optimization
-- ⚠️ **performance-test**: Task could benefit from caching optimization
-- ⚠️ **dev**: Task could benefit from caching optimization
+- ⚠️ **build-docker**: Task could benefit from caching optimization
+- ⚠️ **test-integration**: Task could benefit from caching optimization
+- ⚠️ **lint-backend**: Task could benefit from caching optimization
 
 ### Primary Tool Ecosystem: **Docker**
 

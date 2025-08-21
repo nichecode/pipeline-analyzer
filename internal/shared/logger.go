@@ -106,6 +106,11 @@ func (l *Logger) SetLevel(level LogLevel) {
 	l.level = level
 }
 
+// GetLevel returns the current logging level
+func (l *Logger) GetLevel() LogLevel {
+	return l.level
+}
+
 // logToFile writes to the log file if file logging is enabled
 func (l *Logger) logToFile(level LogLevel, component, message string, context map[string]interface{}) {
 	if l.fileLogger == nil {

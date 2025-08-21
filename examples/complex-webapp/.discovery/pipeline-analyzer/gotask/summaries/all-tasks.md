@@ -30,6 +30,23 @@ Total tasks found: **23**
 
 ## Task Categories
 
+### Quality (3 tasks)
+
+- [lint](../tasks/lint.md)
+- [lint-backend](../tasks/lint-backend.md)
+- [lint-frontend](../tasks/lint-frontend.md)
+
+### Setup (3 tasks)
+
+- [install](../tasks/install.md)
+- [install-backend](../tasks/install-backend.md)
+- [install-frontend](../tasks/install-frontend.md)
+
+### Deploy (2 tasks)
+
+- [deploy-prod](../tasks/deploy-prod.md)
+- [deploy-staging](../tasks/deploy-staging.md)
+
 ### Cleanup (1 tasks)
 
 - [clean](../tasks/clean.md)
@@ -41,12 +58,6 @@ Total tasks found: **23**
 - [build-docker](../tasks/build-docker.md)
 - [build-frontend](../tasks/build-frontend.md)
 
-### Setup (3 tasks)
-
-- [install](../tasks/install.md)
-- [install-backend](../tasks/install-backend.md)
-- [install-frontend](../tasks/install-frontend.md)
-
 ### Test (6 tasks)
 
 - [performance-test](../tasks/performance-test.md)
@@ -56,26 +67,15 @@ Total tasks found: **23**
 - [test-frontend](../tasks/test-frontend.md)
 - [test-integration](../tasks/test-integration.md)
 
-### Quality (3 tasks)
-
-- [lint](../tasks/lint.md)
-- [lint-backend](../tasks/lint-backend.md)
-- [lint-frontend](../tasks/lint-frontend.md)
-
-### Utility (1 tasks)
-
-- [security-scan](../tasks/security-scan.md)
-
 ### Containerization (3 tasks)
 
 - [dev](../tasks/dev.md)
 - [start-services](../tasks/start-services.md)
 - [stop-services](../tasks/stop-services.md)
 
-### Deploy (2 tasks)
+### Utility (1 tasks)
 
-- [deploy-prod](../tasks/deploy-prod.md)
-- [deploy-staging](../tasks/deploy-staging.md)
+- [security-scan](../tasks/security-scan.md)
 
 ## Navigation
 

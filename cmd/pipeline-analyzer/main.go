@@ -21,19 +21,17 @@ func main() {
 		showVersion = flag.Bool("version", false, "Show version information")
 		help        = flag.Bool("help", false, "Show help")
 		debug       = flag.Bool("debug", false, "Enable debug logging")
-		logDir      = flag.String("log-dir", "", "Directory to write log files (default: no file logging)")
 	)
 	flag.Parse()
 
-	// Initialize logging based on flags
+	// Initialize basic logging (file logging will be set up after discovery directory is created)
 	logLevel := shared.LogLevelInfo
 	if *debug {
 		logLevel = shared.LogLevelDebug
 	}
 	
-	if err := shared.InitLogger(logLevel, *logDir); err != nil {
+	if err := shared.InitLogger(logLevel, ""); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to initialize logger: %v\n", err)
-		// Continue without file logging
 	}
 	defer shared.GetLogger().Close()
 
@@ -66,6 +64,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Printf("pipeline-analyzer %s\n", version)
 	fmt.Printf("🔍 Scanning repository: %s\n", absPath)
 
 	// Run auto-discovery and analysis
@@ -82,6 +81,13 @@ func runAutoDiscovery(repoPath string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "❌ Failed to scan repository: %v\n", err)
 		os.Exit(1)
+	}
+
+	// Initialize file logging to the discovery directory
+	logDir := filepath.Join(discoveryDir, "logs")
+	if err := shared.InitLogger(shared.GetLogger().GetLevel(), logDir); err != nil {
+		fmt.Fprintf(os.Stderr, "⚠️  Failed to initialize file logging: %v\n", err)
+		// Continue without file logging
 	}
 
 	// Check if any build tools were found
@@ -163,11 +169,10 @@ func printUsage() {
 	fmt.Printf("  pipeline-analyzer                    # Analyze current directory\n")
 	fmt.Printf("  pipeline-analyzer /path/to/repo     # Analyze specific repository\n")
 	fmt.Printf("  pipeline-analyzer ../my-project     # Analyze relative path\n")
-	fmt.Printf("  pipeline-analyzer --debug --log-dir=logs /repo  # Enable debug logging\n\n")
+	fmt.Printf("  pipeline-analyzer --debug /repo            # Enable debug logging\n\n")
 	
 	fmt.Printf("OPTIONS:\n")
-	fmt.Printf("  --debug                             Enable debug logging output\n")
-	fmt.Printf("  --log-dir=<directory>               Write detailed logs to specified directory\n")
+	fmt.Printf("  --debug                             Enable debug logging (logs written to .discovery/logs/)\n")
 	fmt.Printf("  --version                           Show version information\n")
 	fmt.Printf("  --help                              Show this help message\n\n")
 
@@ -193,6 +198,8 @@ func printUsage() {
 	fmt.Printf("  All analysis results are placed in:\n")
 	fmt.Printf("  📁 .discovery/pipeline-analyzer/\n")
 	fmt.Printf("  ├── README.md                    # Discovery overview\n")
+	fmt.Printf("  ├── index.html                   # HTML navigation\n")
+	fmt.Printf("  ├── logs/                        # Debug and error logs\n")
 	fmt.Printf("  ├── circleci/                    # CircleCI analysis (if found)\n")
 	fmt.Printf("  ├── gotask/                      # Go Task analysis (if found)\n")
 	fmt.Printf("  ├── npm/                         # npm analysis (if found)\n")

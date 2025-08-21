@@ -1,6 +1,6 @@
 # Task Dependency Graph
 
-**Generated:** 2025-08-21T10:04:30+01:00
+**Generated:** 2025-08-21T10:18:49+01:00
 
 ## 🔗 Dependency Overview
 
@@ -12,57 +12,57 @@
 
 ```mermaid
 graph TD
-    stop-services["stop-services"]
-    deploy-staging["deploy-staging"]
-    performance-test["performance-test"]
-    dev["dev"]
+    test-e2e["test-e2e"]
+    build-frontend["build-frontend"]
+    build-docker["build-docker"]
+    test-frontend["test-frontend"]
+    test-integration["test-integration"]
+    lint-backend["lint-backend"]
+    install["install"]
     install-frontend["install-frontend"]
     test["test"]
-    test-frontend["test-frontend"]
-    build["build"]
-    deploy-prod["deploy-prod"]
-    clean["clean"]
-    install["install"]
-    test-integration["test-integration"]
-    test-e2e["test-e2e"]
     lint["lint"]
     lint-frontend["lint-frontend"]
-    build-frontend["build-frontend"]
-    security-scan["security-scan"]
-    lint-backend["lint-backend"]
-    build-docker["build-docker"]
-    start-services["start-services"]
-    install-backend["install-backend"]
+    deploy-staging["deploy-staging"]
+    deploy-prod["deploy-prod"]
+    clean["clean"]
     test-backend["test-backend"]
+    build["build"]
     build-backend["build-backend"]
-    install-frontend --> build-frontend
-    build-docker --> security-scan
-    install-backend --> lint-backend
-    install-frontend --> test-frontend
-    build-frontend --> build
-    build-backend --> build
-    build-docker --> deploy-prod
-    test --> deploy-prod
-    test-e2e --> deploy-prod
-    install-frontend --> install
-    install-backend --> install
-    install-frontend --> lint-frontend
-    install-backend --> test-backend
-    build-docker --> deploy-staging
-    test --> deploy-staging
-    build --> test-e2e
-    start-services --> test-e2e
-    build-docker --> start-services
-    install --> dev
-    install --> test-integration
+    start-services["start-services"]
+    stop-services["stop-services"]
+    security-scan["security-scan"]
+    performance-test["performance-test"]
+    dev["dev"]
+    install-backend["install-backend"]
     lint-frontend --> lint
     lint-backend --> lint
-    build --> build-docker
-    install-backend --> build-backend
-    start-services --> performance-test
+    install-frontend --> lint-frontend
+    install-backend --> test-backend
+    build-docker --> start-services
+    install-frontend --> install
+    install-backend --> install
+    build-docker --> deploy-staging
+    test --> deploy-staging
+    build-docker --> security-scan
+    install --> dev
+    install-frontend --> build-frontend
+    install --> test-integration
     test-frontend --> test
     test-backend --> test
     test-integration --> test
+    install-backend --> build-backend
+    start-services --> performance-test
+    build --> build-docker
+    install-backend --> lint-backend
+    build-docker --> deploy-prod
+    test --> deploy-prod
+    test-e2e --> deploy-prod
+    build-frontend --> build
+    build-backend --> build
+    build --> test-e2e
+    start-services --> test-e2e
+    install-frontend --> test-frontend
 ```
 
 ## 🎯 Critical Path

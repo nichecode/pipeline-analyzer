@@ -9,8 +9,8 @@
 | python | 9 | 5 jobs |
 | pip | 3 | 3 jobs |
 | docker | 3 | 2 jobs |
-| sed | 2 | 2 jobs |
 | echo | 2 | 2 jobs |
+| sed | 2 | 2 jobs |
 | ./ | 2 | 2 jobs |
 | tar | 1 | 1 jobs |
 | curl | 1 | 1 jobs |
@@ -23,13 +23,13 @@
 | `cd` | 9 |
 | `npm` | 8 |
 | `install-dependencies` | 7 |
-| `if` | 4 |
 | `#` | 4 |
+| `if` | 4 |
 | `dockerize` | 3 |
+| `kubernetes/install-kubectl` | 2 |
+| `aws-cli/setup` | 2 |
 | `python` | 2 |
 | `mkdir` | 2 |
-| `aws-cli/setup` | 2 |
-| `kubernetes/install-kubectl` | 2 |
 | `tar` | 1 |
 | `sleep` | 1 |
 
@@ -74,15 +74,15 @@
 - [build-docker-images](../jobs/build-docker-images.md)
 - [test-integration](../jobs/test-integration.md)
 
-### sed (2 jobs)
-
-- [deploy-production](../jobs/deploy-production.md)
-- [deploy-staging](../jobs/deploy-staging.md)
-
 ### echo (2 jobs)
 
 - [build-docker-images](../jobs/build-docker-images.md)
 - [security-scan](../jobs/security-scan.md)
+
+### sed (2 jobs)
+
+- [deploy-production](../jobs/deploy-production.md)
+- [deploy-staging](../jobs/deploy-staging.md)
 
 ### ./ (2 jobs)
 

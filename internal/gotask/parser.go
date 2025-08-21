@@ -181,10 +181,20 @@ func extractCommand(cmdInterface interface{}) string {
 func ExtractTaskDependencies(task Task) []string {
 	var dependencies []string
 
+	// Extract formal dependencies from deps: field
 	for _, depInterface := range task.Deps {
 		dep := extractDependency(depInterface)
 		if dep != "" {
 			dependencies = append(dependencies, dep)
+		}
+	}
+
+	// Extract task calls from commands (task: taskname in cmds)
+	for _, cmdInterface := range task.Cmds {
+		if cmdMap, ok := cmdInterface.(map[string]interface{}); ok {
+			if taskName, ok := cmdMap["task"].(string); ok {
+				dependencies = append(dependencies, taskName)
+			}
 		}
 	}
 

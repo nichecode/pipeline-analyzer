@@ -1,16 +1,14 @@
-package markdown
+package circleci
 
 import (
 	"fmt"
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/nichecode/pipeline-analyzer/internal/circleci"
 )
 
 // GenerateMainReadme generates the main README.md file
-func GenerateMainReadme(analysis *circleci.Analysis, configPath string) string {
+func GenerateMainReadme(analysis *Analysis, configPath string) string {
 	var sb strings.Builder
 
 	sb.WriteString("# CircleCI Analysis Report\n\n")
@@ -20,9 +18,9 @@ func GenerateMainReadme(analysis *circleci.Analysis, configPath string) string {
 	// Overview section
 	sb.WriteString("## 📊 Overview\n\n")
 	sb.WriteString(fmt.Sprintf("- **Unique jobs:** %d\n", analysis.TotalJobs))
-	
+
 	if analysis.TotalWorkflows > 0 {
-		workflowNames := circleci.GetAllWorkflowNames(analysis.Config)
+		workflowNames := GetAllWorkflowNames(analysis.Config)
 		sb.WriteString(fmt.Sprintf("- **Workflows:** %s\n", strings.Join(workflowNames, ", ")))
 	} else {
 		sb.WriteString("- **Workflows:** None found\n")
@@ -37,13 +35,13 @@ func GenerateMainReadme(analysis *circleci.Analysis, configPath string) string {
 
 	// Directory Structure section
 	sb.WriteString("## 📁 Directory Structure\n\n")
-	
+
 	sb.WriteString("### Jobs\n")
 	sb.WriteString("Individual job analysis with run commands and configuration:\n\n")
-	jobNames := circleci.GetAllJobNames(analysis.Config)
+	jobNames := GetAllJobNames(analysis.Config)
 	sort.Strings(jobNames)
 	for _, jobName := range jobNames {
-		normalizedName := circleci.NormalizeJobName(jobName)
+		normalizedName := NormalizeJobName(jobName)
 		sb.WriteString(fmt.Sprintf("- [jobs/%s.md](jobs/%s.md)\n", normalizedName, normalizedName))
 	}
 	sb.WriteString("\n")
@@ -51,10 +49,10 @@ func GenerateMainReadme(analysis *circleci.Analysis, configPath string) string {
 	sb.WriteString("### Workflows\n")
 	sb.WriteString("Workflow structure and job dependencies:\n\n")
 	if analysis.TotalWorkflows > 0 {
-		workflowNames := circleci.GetAllWorkflowNames(analysis.Config)
+		workflowNames := GetAllWorkflowNames(analysis.Config)
 		sort.Strings(workflowNames)
 		for _, workflowName := range workflowNames {
-			normalizedName := circleci.NormalizeJobName(workflowName)
+			normalizedName := NormalizeJobName(workflowName)
 			sb.WriteString(fmt.Sprintf("- [workflows/%s.md](workflows/%s.md)\n", normalizedName, normalizedName))
 		}
 	} else {
@@ -80,21 +78,21 @@ func GenerateMainReadme(analysis *circleci.Analysis, configPath string) string {
 
 	// Most Used Jobs section
 	sb.WriteString("## 🔍 Most Used Jobs\n\n")
-	mostUsedJobs := circleci.GetMostUsedJobs(analysis)
+	mostUsedJobs := GetMostUsedJobs(analysis)
 	if len(mostUsedJobs) > 0 {
 		sb.WriteString("| Job | Usage Count | Link |\n")
 		sb.WriteString("|-----|-------------|------|\n")
-		
+
 		// Show top 10
 		limit := 10
 		if len(mostUsedJobs) < limit {
 			limit = len(mostUsedJobs)
 		}
-		
+
 		for i := 0; i < limit; i++ {
 			job := mostUsedJobs[i]
-			normalizedName := circleci.NormalizeJobName(job.Name)
-			sb.WriteString(fmt.Sprintf("| %s | %d | [View Details](jobs/%s.md) |\n", 
+			normalizedName := NormalizeJobName(job.Name)
+			sb.WriteString(fmt.Sprintf("| %s | %d | [View Details](jobs/%s.md) |\n",
 				job.Name, job.Count, normalizedName))
 		}
 	} else {
@@ -105,7 +103,7 @@ func GenerateMainReadme(analysis *circleci.Analysis, configPath string) string {
 }
 
 // GenerateMigrationChecklist generates the migration checklist
-func GenerateMigrationChecklist(analysis *circleci.Analysis) string {
+func GenerateMigrationChecklist(analysis *Analysis) string {
 	var sb strings.Builder
 
 	sb.WriteString("# CircleCI → go-task Migration Checklist\n\n")
@@ -118,8 +116,8 @@ func GenerateMigrationChecklist(analysis *circleci.Analysis) string {
 	sb.WriteString("### 📊 Current State\n\n")
 	sb.WriteString(fmt.Sprintf("- **%d jobs** to migrate\n", analysis.TotalJobs))
 	sb.WriteString(fmt.Sprintf("- **%d workflows** to understand\n", analysis.TotalWorkflows))
-	
-	dockerJobs, otherJobs := circleci.CountDockerUsage(analysis.Config)
+
+	dockerJobs, otherJobs := CountDockerUsage(analysis.Config)
 	sb.WriteString(fmt.Sprintf("- **%d jobs** use Docker\n", dockerJobs))
 	sb.WriteString(fmt.Sprintf("- **%d jobs** use other executors\n", otherJobs))
 	sb.WriteString("\n")
@@ -128,19 +126,19 @@ func GenerateMigrationChecklist(analysis *circleci.Analysis) string {
 	sb.WriteString("## 🔄 Migration Steps\n\n")
 	sb.WriteString("### 1. **Understand job dependencies**\n")
 	sb.WriteString("Review [Job Usage Analysis](summaries/job-usage.md) to see which jobs depend on others.\n\n")
-	
+
 	sb.WriteString("### 2. **Examine Docker images and executors**\n")
 	sb.WriteString("Check [Docker & Scripts](summaries/docker-and-scripts.md) for container requirements.\n\n")
-	
+
 	sb.WriteString("### 3. **Analyze command patterns**\n")
 	sb.WriteString("Study [Commands Analysis](summaries/commands.md) to understand build patterns.\n\n")
-	
+
 	sb.WriteString("### 4. **Start with high-impact jobs**\n")
 	sb.WriteString("Begin with the most frequently used jobs from the overview.\n\n")
-	
+
 	sb.WriteString("### 5. **Convert commands to go-task**\n")
 	sb.WriteString("Transform run commands to task format - see individual job files.\n\n")
-	
+
 	sb.WriteString("### 6. **Test task equivalents** locally\n\n")
 
 	// Key Files section
@@ -155,26 +153,26 @@ func GenerateMigrationChecklist(analysis *circleci.Analysis) string {
 	sb.WriteString("```yaml\n")
 	sb.WriteString("version: '3'\n\n")
 	sb.WriteString("tasks:\n")
-	
-	jobNames := circleci.GetAllJobNames(analysis.Config)
+
+	jobNames := GetAllJobNames(analysis.Config)
 	sort.Strings(jobNames)
 	for _, jobName := range jobNames {
 		job := analysis.Config.Jobs[jobName]
 		sb.WriteString(fmt.Sprintf("  %s:\n", jobName))
-		
+
 		if job.Description != "" {
 			sb.WriteString(fmt.Sprintf("    desc: \"%s\"\n", job.Description))
 		} else {
 			sb.WriteString("    desc: \"Migrated from CircleCI job\"\n")
 		}
-		
+
 		// Try to detect dependencies
 		if deps, hasDeps := analysis.JobDependencies[jobName]; hasDeps && len(deps) > 0 {
 			sb.WriteString(fmt.Sprintf("    deps: [%s]\n", strings.Join(deps, ", ")))
 		}
-		
+
 		sb.WriteString("    cmds:\n")
-		sb.WriteString(fmt.Sprintf("      - # Convert run commands from jobs/%s.md\n", circleci.NormalizeJobName(jobName)))
+		sb.WriteString(fmt.Sprintf("      - # Convert run commands from jobs/%s.md\n", NormalizeJobName(jobName)))
 		sb.WriteString("\n")
 	}
 	sb.WriteString("```\n\n")
@@ -189,7 +187,7 @@ func GenerateMigrationChecklist(analysis *circleci.Analysis) string {
 }
 
 // GenerateJobMarkdown generates markdown for a single job
-func GenerateJobMarkdown(jobAnalysis *circleci.JobAnalysis) string {
+func GenerateJobMarkdown(jobAnalysis *JobAnalysis) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("# Job: %s\n\n", jobAnalysis.Name))
@@ -201,11 +199,11 @@ func GenerateJobMarkdown(jobAnalysis *circleci.JobAnalysis) string {
 	// Usage info
 	sb.WriteString("## Usage Information\n\n")
 	sb.WriteString(fmt.Sprintf("- **Used in workflows:** %d times\n", jobAnalysis.UsageCount))
-	
+
 	if len(jobAnalysis.Dependencies) > 0 {
 		sb.WriteString(fmt.Sprintf("- **Depends on:** %s\n", strings.Join(jobAnalysis.Dependencies, ", ")))
 	}
-	
+
 	if jobAnalysis.Executor != "" {
 		sb.WriteString(fmt.Sprintf("- **Executor:** %s\n", jobAnalysis.Executor))
 	}
@@ -239,7 +237,7 @@ func GenerateJobMarkdown(jobAnalysis *circleci.JobAnalysis) string {
 			patterns = append(patterns, pattern)
 		}
 		sort.Strings(patterns)
-		
+
 		for _, pattern := range patterns {
 			count := jobAnalysis.Patterns[pattern]
 			sb.WriteString(fmt.Sprintf("- **%s:** %d occurrences\n", pattern, count))
@@ -258,7 +256,7 @@ func GenerateJobMarkdown(jobAnalysis *circleci.JobAnalysis) string {
 		sb.WriteString(fmt.Sprintf("  deps: [%s]\n", strings.Join(jobAnalysis.Dependencies, ", ")))
 	}
 	sb.WriteString("  cmds:\n")
-	
+
 	if len(jobAnalysis.Commands) > 0 {
 		for _, command := range jobAnalysis.Commands {
 			// Simple command formatting for go-task
@@ -278,29 +276,29 @@ func GenerateJobMarkdown(jobAnalysis *circleci.JobAnalysis) string {
 }
 
 // GenerateWorkflowMarkdown generates markdown for a single workflow
-func GenerateWorkflowMarkdown(workflowAnalysis *circleci.WorkflowAnalysis) string {
+func GenerateWorkflowMarkdown(workflowAnalysis *WorkflowAnalysis) string {
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf("# Workflow: %s\n\n", workflowAnalysis.Name))
 
 	sb.WriteString("## Job Execution Order\n\n")
-	
+
 	if len(workflowAnalysis.Jobs) > 0 {
 		sb.WriteString("| Job | Dependencies | Context |\n")
 		sb.WriteString("|-----|--------------|----------|\n")
-		
+
 		for _, job := range workflowAnalysis.Jobs {
 			deps := "None"
 			if len(job.Requires) > 0 {
 				deps = strings.Join(job.Requires, ", ")
 			}
-			
+
 			context := "None"
 			if len(job.Context) > 0 {
 				context = strings.Join(job.Context, ", ")
 			}
-			
-			normalizedName := circleci.NormalizeJobName(job.Name)
+
+			normalizedName := NormalizeJobName(job.Name)
 			jobLink := fmt.Sprintf("[%s](../jobs/%s.md)", job.Name, normalizedName)
 			sb.WriteString(fmt.Sprintf("| %s | %s | %s |\n", jobLink, deps, context))
 		}
@@ -312,11 +310,11 @@ func GenerateWorkflowMarkdown(workflowAnalysis *circleci.WorkflowAnalysis) strin
 	// Dependency Graph
 	sb.WriteString("## Dependency Graph\n\n")
 	sb.WriteString("```\n")
-	
+
 	// Create a simple text-based dependency graph
 	independentJobs := []string{}
 	dependentJobs := map[string][]string{}
-	
+
 	for _, job := range workflowAnalysis.Jobs {
 		if len(job.Requires) == 0 {
 			independentJobs = append(independentJobs, job.Name)
@@ -324,7 +322,7 @@ func GenerateWorkflowMarkdown(workflowAnalysis *circleci.WorkflowAnalysis) strin
 			dependentJobs[job.Name] = job.Requires
 		}
 	}
-	
+
 	if len(independentJobs) > 0 {
 		sb.WriteString("Independent jobs (run first):\n")
 		for _, job := range independentJobs {
@@ -332,7 +330,7 @@ func GenerateWorkflowMarkdown(workflowAnalysis *circleci.WorkflowAnalysis) strin
 		}
 		sb.WriteString("\n")
 	}
-	
+
 	if len(dependentJobs) > 0 {
 		sb.WriteString("Dependent jobs:\n")
 		for job, deps := range dependentJobs {
@@ -342,7 +340,7 @@ func GenerateWorkflowMarkdown(workflowAnalysis *circleci.WorkflowAnalysis) strin
 			}
 		}
 	}
-	
+
 	sb.WriteString("```\n\n")
 
 	// Navigation

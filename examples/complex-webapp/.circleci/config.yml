@@ -1,0 +1,678 @@
+version: 2.1
+
+# Define custom orbs for reusable functionality
+orbs:
+  node: circleci/node@5.0.2
+  docker: circleci/docker@2.2.0
+  aws-cli: circleci/aws-cli@3.1.4
+  kubernetes: circleci/kubernetes@1.3.1
+  slack: circleci/slack@4.10.1
+
+# Define executors for different environments
+executors:
+  node-executor:
+    docker:
+      - image: cimg/node:18.17.0
+    resource_class: medium
+    environment:
+      NODE_ENV: test
+      CI: true
+  
+  python-executor:
+    docker:
+      - image: cimg/python:3.11
+    resource_class: small
+  
+  docker-executor:
+    docker:
+      - image: cimg/base:stable
+    resource_class: medium+
+  
+  e2e-executor:
+    docker:
+      - image: cimg/node:18.17.0-browsers
+      - image: cimg/postgres:14.0
+        environment:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: webapp_test
+      - image: redis:6.2-alpine
+    resource_class: large
+    environment:
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/webapp_test
+      REDIS_URL: redis://localhost:6379
+
+# Define parameters for conditional execution
+parameters:
+  run-e2e-tests:
+    type: boolean
+    default: false
+  deploy-to-staging:
+    type: boolean
+    default: false
+  deploy-to-production:
+    type: boolean
+    default: false
+
+# Define commands for reusable functionality
+commands:
+  restore-npm-cache:
+    description: "Restore NPM cache"
+    steps:
+      - restore_cache:
+          name: Restore NPM cache
+          keys:
+            - npm-cache-v2-{{ arch }}-{{ checksum "package-lock.json" }}
+            - npm-cache-v2-{{ arch }}-
+  
+  save-npm-cache:
+    description: "Save NPM cache"
+    steps:
+      - save_cache:
+          name: Save NPM cache
+          key: npm-cache-v2-{{ arch }}-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+            - node_modules
+  
+  install-dependencies:
+    description: "Install project dependencies"
+    steps:
+      - restore-npm-cache
+      - run:
+          name: Install dependencies
+          command: |
+            if [ ! -d "node_modules" ]; then
+              npm ci --production=false
+            else
+              echo "Dependencies already installed"
+            fi
+      - save-npm-cache
+  
+  notify-slack-on-failure:
+    description: "Notify Slack channel on failure"
+    steps:
+      - slack/notify:
+          event: fail
+          channel: '#deployments'
+          template: basic_fail_1
+
+# Main job definitions
+jobs:
+  # Code quality and linting jobs
+  lint-frontend:
+    executor: node-executor
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Run ESLint
+          command: |
+            npm run lint -- --format junit --output-file test-results/eslint/results.xml
+            npm run lint:css -- --formatter junit --output test-results/stylelint/results.xml
+      - run:
+          name: Run Prettier check
+          command: npm run format:check
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+      - notify-slack-on-failure
+  
+  lint-backend:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Install Python dependencies
+          command: |
+            python -m pip install --upgrade pip
+            pip install -r api/requirements.txt
+            pip install -r api/requirements-dev.txt
+      - run:
+          name: Run Python linting
+          command: |
+            cd api
+            flake8 . --format=junit-xml --output-file=../test-results/flake8/results.xml
+            black --check .
+            mypy . --junit-xml ../test-results/mypy/results.xml
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+  
+  # Security scanning
+  security-scan:
+    executor: node-executor
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Run npm audit
+          command: |
+            npm audit --audit-level=moderate --json > security-results/npm-audit.json || true
+            npm audit --audit-level=moderate
+      - run:
+          name: Run Snyk security scan
+          command: |
+            if [ -n "$SNYK_TOKEN" ]; then
+              npx snyk test --json > security-results/snyk.json || true
+              npx snyk test
+            else
+              echo "Skipping Snyk scan - SNYK_TOKEN not set"
+            fi
+      - store_artifacts:
+          path: security-results
+      - notify-slack-on-failure
+  
+  # Unit testing jobs
+  test-frontend:
+    executor: node-executor
+    parallelism: 4
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Run frontend tests
+          command: |
+            mkdir -p test-results/jest
+            npm run test:unit -- \
+              --ci \
+              --coverage \
+              --watchAll=false \
+              --testResultsProcessor="jest-junit" \
+              --coverageReporters="lcov" "text" "cobertura" \
+              --maxWorkers=2
+      - run:
+          name: Upload coverage to Codecov
+          command: |
+            if [ -n "$CODECOV_TOKEN" ]; then
+              npx codecov
+            fi
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: coverage
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage
+      - notify-slack-on-failure
+  
+  test-backend:
+    executor: python-executor
+    docker:
+      - image: cimg/python:3.11
+      - image: cimg/postgres:14.0
+        environment:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: webapp_test
+    steps:
+      - checkout
+      - run:
+          name: Install Python dependencies
+          command: |
+            python -m pip install --upgrade pip
+            pip install -r api/requirements.txt
+            pip install -r api/requirements-dev.txt
+      - run:
+          name: Wait for database
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Run database migrations
+          command: |
+            cd api
+            python manage.py migrate --settings=config.settings.test
+      - run:
+          name: Run Python tests
+          command: |
+            cd api
+            python -m pytest \
+              --junitxml=../test-results/pytest/results.xml \
+              --cov=. \
+              --cov-report=html:../coverage/python \
+              --cov-report=xml:../coverage/python/coverage.xml \
+              tests/
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: coverage
+      - persist_to_workspace:
+          root: .
+          paths:
+            - coverage
+      - notify-slack-on-failure
+  
+  # Integration testing
+  test-integration:
+    executor: e2e-executor
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Wait for services
+          command: |
+            dockerize -wait tcp://localhost:5432 -timeout 2m
+            dockerize -wait tcp://localhost:6379 -timeout 1m
+      - run:
+          name: Setup test database
+          command: |
+            cd api
+            python manage.py migrate --settings=config.settings.test
+            python manage.py loaddata fixtures/test_data.json --settings=config.settings.test
+      - run:
+          name: Start application servers
+          background: true
+          command: |
+            cd api && python manage.py runserver 0.0.0.0:8000 --settings=config.settings.test &
+            npm run start:test &
+            sleep 30
+      - run:
+          name: Run integration tests
+          command: |
+            npm run test:integration -- \
+              --reporter=xunit \
+              --reporter-options output=test-results/integration/results.xml
+      - run:
+          name: Capture application logs
+          command: |
+            mkdir -p test-results/logs
+            docker logs $(docker ps -aq) > test-results/logs/containers.log 2>&1 || true
+          when: always
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+      - notify-slack-on-failure
+  
+  # End-to-end testing (conditional)
+  test-e2e:
+    executor: e2e-executor
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Wait for services
+          command: |
+            dockerize -wait tcp://localhost:5432 -timeout 2m
+            dockerize -wait tcp://localhost:6379 -timeout 1m
+      - run:
+          name: Setup test environment
+          command: |
+            cd api
+            python manage.py migrate --settings=config.settings.test
+            python manage.py loaddata fixtures/e2e_data.json --settings=config.settings.test
+      - run:
+          name: Start application
+          background: true
+          command: |
+            cd api && python manage.py runserver 0.0.0.0:8000 --settings=config.settings.test &
+            npm run start:e2e &
+            sleep 45
+      - run:
+          name: Run E2E tests
+          command: |
+            npm run test:e2e -- \
+              --reporter spec \
+              --reporter junit \
+              --reporter-options mochaFile=test-results/e2e/results.xml
+      - run:
+          name: Take screenshots on failure
+          command: |
+            if [ -d "cypress/screenshots" ]; then
+              mkdir -p test-results/screenshots
+              cp -r cypress/screenshots/* test-results/screenshots/
+            fi
+          when: on_fail
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+      - store_artifacts:
+          path: cypress/videos
+      - store_artifacts:
+          path: cypress/screenshots
+      - notify-slack-on-failure
+  
+  # Build jobs
+  build-frontend:
+    executor: node-executor
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Build frontend application
+          command: |
+            npm run build:prod
+            npm run build:analyze
+      - run:
+          name: Compress build artifacts
+          command: |
+            tar -czf build-artifacts.tar.gz dist/
+            ls -la build-artifacts.tar.gz
+      - store_artifacts:
+          path: dist
+      - store_artifacts:
+          path: build-artifacts.tar.gz
+      - store_artifacts:
+          path: webpack-bundle-analyzer-report.html
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+            - build-artifacts.tar.gz
+      - notify-slack-on-failure
+  
+  build-backend:
+    executor: python-executor
+    steps:
+      - checkout
+      - run:
+          name: Build Python package
+          command: |
+            cd api
+            python setup.py sdist bdist_wheel
+      - run:
+          name: Validate package
+          command: |
+            cd api
+            pip install twine
+            twine check dist/*
+      - store_artifacts:
+          path: api/dist
+      - persist_to_workspace:
+          root: .
+          paths:
+            - api/dist
+      - notify-slack-on-failure
+  
+  # Docker image building
+  build-docker-images:
+    executor: docker-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
+      - run:
+          name: Build Docker images
+          command: |
+            # Build frontend image
+            docker build \
+              --tag webapp-frontend:${CIRCLE_SHA1} \
+              --tag webapp-frontend:latest \
+              --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+              --build-arg VCS_REF=${CIRCLE_SHA1} \
+              --file docker/frontend/Dockerfile .
+            
+            # Build backend image
+            docker build \
+              --tag webapp-backend:${CIRCLE_SHA1} \
+              --tag webapp-backend:latest \
+              --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+              --build-arg VCS_REF=${CIRCLE_SHA1} \
+              --file docker/backend/Dockerfile .
+      - run:
+          name: Run security scan on images
+          command: |
+            # Install trivy
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /tmp
+            
+            # Scan images
+            /tmp/trivy image --format json --output frontend-scan.json webapp-frontend:${CIRCLE_SHA1}
+            /tmp/trivy image --format json --output backend-scan.json webapp-backend:${CIRCLE_SHA1}
+            
+            # Check for HIGH and CRITICAL vulnerabilities
+            /tmp/trivy image --severity HIGH,CRITICAL --exit-code 1 webapp-frontend:${CIRCLE_SHA1}
+            /tmp/trivy image --severity HIGH,CRITICAL --exit-code 1 webapp-backend:${CIRCLE_SHA1}
+      - run:
+          name: Push to registry
+          command: |
+            if [ -n "$DOCKER_HUB_TOKEN" ] && [ "$CIRCLE_BRANCH" == "main" ]; then
+              echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+              
+              docker push webapp-frontend:${CIRCLE_SHA1}
+              docker push webapp-frontend:latest
+              docker push webapp-backend:${CIRCLE_SHA1}
+              docker push webapp-backend:latest
+            else
+              echo "Skipping Docker push - not main branch or credentials not available"
+            fi
+      - store_artifacts:
+          path: frontend-scan.json
+      - store_artifacts:
+          path: backend-scan.json
+      - notify-slack-on-failure
+  
+  # Performance testing
+  test-performance:
+    executor: node-executor
+    resource_class: large
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Run Lighthouse CI
+          command: |
+            npm run start:prod &
+            sleep 30
+            npx lhci autorun --config=.lighthouserc.json
+      - run:
+          name: Run load testing
+          command: |
+            npm run test:load -- --reporter json > load-test-results.json
+      - store_artifacts:
+          path: .lighthouseci
+      - store_artifacts:
+          path: load-test-results.json
+      - notify-slack-on-failure
+  
+  # Deployment jobs
+  deploy-staging:
+    executor: docker-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - aws-cli/setup
+      - kubernetes/install-kubectl
+      - run:
+          name: Deploy to staging
+          command: |
+            # Update Kubernetes manifests with new image tags
+            sed -i "s/IMAGE_TAG/${CIRCLE_SHA1}/g" k8s/staging/*.yaml
+            
+            # Apply Kubernetes manifests
+            kubectl apply -f k8s/staging/ --context=staging-cluster
+            
+            # Wait for deployment rollout
+            kubectl rollout status deployment/webapp-frontend --timeout=600s --context=staging-cluster
+            kubectl rollout status deployment/webapp-backend --timeout=600s --context=staging-cluster
+      - run:
+          name: Run smoke tests
+          command: |
+            sleep 60
+            npm run test:smoke -- --env=staging
+      - slack/notify:
+          event: pass
+          channel: '#deployments'
+          template: success_tagged_deploy_1
+      - notify-slack-on-failure
+  
+  deploy-production:
+    executor: docker-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - aws-cli/setup
+      - kubernetes/install-kubectl
+      - run:
+          name: Deploy to production
+          command: |
+            # Update Kubernetes manifests
+            sed -i "s/IMAGE_TAG/${CIRCLE_SHA1}/g" k8s/production/*.yaml
+            
+            # Rolling deployment with canary
+            kubectl apply -f k8s/production/ --context=production-cluster
+            
+            # Canary deployment
+            kubectl patch deployment webapp-frontend -p '{"spec":{"replicas":1}}' --context=production-cluster
+            kubectl patch deployment webapp-backend -p '{"spec":{"replicas":1}}' --context=production-cluster
+            
+            # Wait and validate canary
+            kubectl rollout status deployment/webapp-frontend --timeout=300s --context=production-cluster
+            kubectl rollout status deployment/webapp-backend --timeout=300s --context=production-cluster
+            
+            # Run production smoke tests
+            sleep 60
+            npm run test:smoke -- --env=production
+            
+            # Scale up to full deployment
+            kubectl patch deployment webapp-frontend -p '{"spec":{"replicas":3}}' --context=production-cluster
+            kubectl patch deployment webapp-backend -p '{"spec":{"replicas":2}}' --context=production-cluster
+            
+            # Final rollout check
+            kubectl rollout status deployment/webapp-frontend --timeout=600s --context=production-cluster
+            kubectl rollout status deployment/webapp-backend --timeout=600s --context=production-cluster
+      - slack/notify:
+          event: pass
+          channel: '#deployments'
+          template: success_tagged_deploy_1
+      - notify-slack-on-failure
+
+# Workflow definitions
+workflows:
+  
+  # Main CI/CD pipeline
+  build-test-deploy:
+    jobs:
+      # Parallel linting and security
+      - lint-frontend:
+          filters:
+            branches:
+              only: /.*/
+      - lint-backend:
+          filters:
+            branches:
+              only: /.*/
+      - security-scan:
+          filters:
+            branches:
+              only: /.*/
+      
+      # Unit tests (parallel)
+      - test-frontend:
+          requires:
+            - lint-frontend
+      - test-backend:
+          requires:
+            - lint-backend
+      
+      # Integration tests
+      - test-integration:
+          requires:
+            - test-frontend
+            - test-backend
+      
+      # Conditional E2E tests
+      - test-e2e:
+          requires:
+            - test-integration
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+          when: << pipeline.parameters.run-e2e-tests >>
+      
+      # Build phase
+      - build-frontend:
+          requires:
+            - test-frontend
+          filters:
+            branches:
+              only: /.*/
+      - build-backend:
+          requires:
+            - test-backend
+          filters:
+            branches:
+              only: /.*/
+      
+      # Docker builds
+      - build-docker-images:
+          requires:
+            - build-frontend
+            - build-backend
+            - security-scan
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+                - /feature\/docker-.*/
+      
+      # Performance testing (main branch only)
+      - test-performance:
+          requires:
+            - build-frontend
+          filters:
+            branches:
+              only: main
+      
+      # Staging deployment
+      - deploy-staging:
+          requires:
+            - build-docker-images
+            - test-integration
+          filters:
+            branches:
+              only: develop
+          when: << pipeline.parameters.deploy-to-staging >>
+      
+      # Production deployment (requires approval)
+      - hold-for-approval:
+          type: approval
+          requires:
+            - build-docker-images
+            - test-performance
+          filters:
+            branches:
+              only: main
+          when: << pipeline.parameters.deploy-to-production >>
+      
+      - deploy-production:
+          requires:
+            - hold-for-approval
+          filters:
+            branches:
+              only: main
+          when: << pipeline.parameters.deploy-to-production >>
+  
+  # Nightly comprehensive testing
+  nightly-full-test:
+    triggers:
+      - schedule:
+          cron: "0 2 * * *"
+          filters:
+            branches:
+              only: main
+    jobs:
+      - test-e2e
+      - test-performance
+      - security-scan
+  
+  # Weekly security scan
+  weekly-security:
+    triggers:
+      - schedule:
+          cron: "0 6 * * 1"
+          filters:
+            branches:
+              only: main
+    jobs:
+      - security-scan

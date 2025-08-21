@@ -1,0 +1,172 @@
+version: '3'
+
+vars:
+  APP_NAME: complex-webapp
+  NODE_VERSION: "18.17.0"
+  PYTHON_VERSION: "3.11"
+
+tasks:
+  install:
+    desc: Install all dependencies (frontend and backend)
+    deps: [install-frontend, install-backend]
+
+  install-frontend:
+    desc: Install frontend dependencies
+    cmds:
+      - npm install
+    sources:
+      - package.json
+      - package-lock.json
+    generates:
+      - node_modules/**
+
+  install-backend:
+    desc: Install backend dependencies
+    cmds:
+      - pip install -r api/requirements.txt
+      - pip install -r api/requirements-dev.txt
+    sources:
+      - api/requirements.txt
+      - api/requirements-dev.txt
+
+  test:
+    desc: Run all tests
+    deps: [test-frontend, test-backend, test-integration]
+
+  test-frontend:
+    desc: Run frontend unit tests
+    cmds:
+      - npm run test:unit
+    deps: [install-frontend]
+
+  test-backend:
+    desc: Run backend unit tests
+    cmds:
+      - cd api && python -m pytest tests/
+    deps: [install-backend]
+
+  test-integration:
+    desc: Run integration tests
+    cmds:
+      - docker-compose up -d postgres redis
+      - sleep 10
+      - npm run test:integration
+      - docker-compose down
+    deps: [install]
+
+  test-e2e:
+    desc: Run end-to-end tests
+    cmds:
+      - npm run test:e2e
+    deps: [build, start-services]
+
+  lint:
+    desc: Run all linting
+    deps: [lint-frontend, lint-backend]
+
+  lint-frontend:
+    desc: Lint frontend code
+    cmds:
+      - npm run lint
+      - npm run lint:css
+      - npm run format:check
+    deps: [install-frontend]
+
+  lint-backend:
+    desc: Lint backend code
+    cmds:
+      - cd api && flake8 .
+      - cd api && black --check .
+      - cd api && mypy .
+    deps: [install-backend]
+
+  build:
+    desc: Build all components
+    deps: [build-frontend, build-backend]
+
+  build-frontend:
+    desc: Build frontend for production
+    cmds:
+      - npm run build:prod
+    deps: [install-frontend]
+    sources:
+      - src/**/*
+      - webpack.config.js
+    generates:
+      - dist/**
+
+  build-backend:
+    desc: Build backend package
+    cmds:
+      - cd api && python setup.py sdist bdist_wheel
+    deps: [install-backend]
+    sources:
+      - api/**/*.py
+      - api/setup.py
+    generates:
+      - api/dist/**
+
+  build-docker:
+    desc: Build Docker images
+    cmds:
+      - docker build -t complex-webapp-frontend:latest -f docker/frontend/Dockerfile .
+      - docker build -t complex-webapp-backend:latest -f docker/backend/Dockerfile .
+    deps: [build]
+
+  start-services:
+    desc: Start all services for development
+    cmds:
+      - docker-compose up -d
+    deps: [build-docker]
+
+  stop-services:
+    desc: Stop all services
+    cmds:
+      - docker-compose down
+
+  deploy-staging:
+    desc: Deploy to staging environment
+    cmds:
+      - kubectl apply -f k8s/staging/ --context=staging-cluster
+    deps: [build-docker, test]
+
+  deploy-prod:
+    desc: Deploy to production environment
+    cmds:
+      - kubectl apply -f k8s/production/ --context=production-cluster
+    deps: [build-docker, test, test-e2e]
+
+  security-scan:
+    desc: Run security scans
+    cmds:
+      - npm audit --audit-level=moderate
+      - if [ -n "$SNYK_TOKEN" ]; then npx snyk test; fi
+      - trivy image complex-webapp-frontend:latest
+      - trivy image complex-webapp-backend:latest
+    deps: [build-docker]
+
+  performance-test:
+    desc: Run performance tests
+    cmds:
+      - npm run test:load
+      - npx lhci autorun --config=.lighthouserc.json
+    deps: [start-services]
+
+  clean:
+    desc: Clean all build artifacts
+    cmds:
+      - rm -rf dist/
+      - rm -rf node_modules/
+      - rm -rf api/dist/
+      - docker-compose down --volumes --remove-orphans
+      - docker image prune -f
+
+  dev:
+    desc: Start development environment
+    cmds:
+      - docker-compose up -d postgres redis
+      - npm run start &
+      - cd api && python manage.py runserver &
+      - echo "Frontend http://localhost:3000"
+      - echo "Backend http://localhost:8000"
+    deps: [install]

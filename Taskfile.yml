@@ -12,8 +12,18 @@ env:
 
 tasks:
   default:
-    desc: Show available tasks
+    desc: Show available tasks and installation instructions
     cmds:
+      - echo "🚀 Pipeline Analyzer - Auto-Discovery Build Tool Analysis"
+      - echo ""
+      - echo "📦 INSTALLATION (Recommended):"
+      - echo "   go install github.com/nichecode/pipeline-analyzer/cmd/pipeline-analyzer@latest"
+      - echo ""
+      - echo "🎯 USAGE:"
+      - echo "   pipeline-analyzer                    (analyze current directory)"
+      - echo "   pipeline-analyzer /path/to/repo     (analyze specific repository)"
+      - echo ""
+      - echo "📋 Available development tasks:"
       - task --list
 
   deps:
@@ -38,23 +48,22 @@ tasks:
       - "{{.APP_NAME}}"
 
   install:
-    desc: 📲 Install pipeline-analyzer to /usr/local/bin
-    deps: [build]
+    desc: 📲 Install with go install (recommended)
     cmds:
-      - echo "📲 Installing {{.APP_NAME}}..."
-      - sudo cp {{.APP_NAME}} /usr/local/bin/
-      - echo "✅ Installed {{.APP_NAME}} to /usr/local/bin"
+      - echo "📦 Installing {{.APP_NAME}} with go install..."
+      - go install ./cmd/{{.APP_NAME}}
+      - echo "✅ Installed {{.APP_NAME}} via go install"
+      - echo "💡 Make sure $GOPATH/bin is in your PATH"
       - echo "💡 Now you can run '{{.APP_NAME}}' from anywhere!"
 
-  install-local:
-    desc: 📲 Install pipeline-analyzer to ~/bin (no sudo required)
+  install-dev:
+    desc: 📲 Install development build locally
     deps: [build]
     cmds:
       - mkdir -p ~/bin
       - cp {{.APP_NAME}} ~/bin/
-      - echo "✅ Installed {{.APP_NAME}} to ~/bin"
+      - echo "✅ Installed development build to ~/bin"
       - echo "💡 Make sure ~/bin is in your PATH"
-      - echo "💡 Now you can run '{{.APP_NAME}}' from anywhere!"
 
   run:
     desc: 🚀 Run pipeline-analyzer with default config
@@ -172,9 +181,14 @@ tasks:
       - task: deps
       - task: build
       - echo "✅ Setup complete!"
-      - echo "💡 Run 'task run' to analyze .circleci/config.yml"
-      - echo "💡 Run 'task run-help' to see all options"
-      - echo "💡 Run 'task install-local' to install globally"
+      - echo ""
+      - echo "📦 For end users, recommend:"
+      - echo "   go install github.com/nichecode/pipeline-analyzer/cmd/pipeline-analyzer@latest"
+      - echo ""
+      - echo "🛠️ For development:"
+      - echo "   task demo                    # See auto-discovery in action"
+      - echo "   task install-dev             # Install development build"
+      - echo "   task run-help                # Show help output"
 
   update:
     desc: 🔄 Update dependencies
@@ -185,51 +199,49 @@ tasks:
       - echo "✅ Dependencies updated"
 
   demo:
-    desc: 🎬 Run demo with bash script reference
+    desc: 🎬 Run auto-discovery demo on current repository
     deps: [build]
     cmds:
-      - echo "🎬 Running demo analysis on bash script..."
-      - echo "📝 Creating sample CircleCI config for demo..."
-      - mkdir -p .demo/.circleci
-      - |
-        cat > .demo/.circleci/config.yml << 'EOF'
-        version: 2.1
-        
-        jobs:
-          build:
-            docker:
-              - image: cimg/go:1.21
-            steps:
-              - checkout
-              - run: go mod download
-              - run: go build -o app ./cmd/pipeline-analyzer
-          
-          test:
-            docker:
-              - image: cimg/go:1.21
-            steps:
-              - checkout
-              - run: go mod download
-              - run: go test ./...
-          
-          lint:
-            docker:
-              - image: golangci/golangci-lint:latest
-            steps:
-              - checkout
-              - run: golangci-lint run
-        
-        workflows:
-          main:
-            jobs:
-              - build
-              - test:
-                  requires: [build]
-              - lint:
-                  requires: [build]
-        EOF
-      - echo "🚀 Running analysis..."
-      - ./{{.APP_NAME}} --output-dir .demo/analysis .demo/.circleci/config.yml
-      - echo "📁 Demo analysis complete! Check .demo/analysis/"
-      - echo "🧹 Cleaning up demo files..."
-      - rm -rf .demo
+      - echo "🎬 Running auto-discovery demo..."
+      - echo "🔍 This analyzes the current repository automatically"
+      - echo "💡 End users would run pipeline-analyzer"
+      - ./{{.APP_NAME}}
+      - echo "📁 Demo complete! Check .discovery/pipeline-analyzer/"
+
+  analyze-self:
+    desc: 🔍 Analyze this project with auto-discovery
+    deps: [build]
+    cmds:
+      - echo "🔍 Running auto-discovery on this repository..."
+      - ./{{.APP_NAME}}
+      - echo "✅ Self-analysis complete! Check .discovery/pipeline-analyzer/"
+
+  test-examples:
+    desc: 🧪 Test analyzer on all examples
+    deps: [build]
+    cmds:
+      - echo "🧪 Testing pipeline analyzer on examples..."
+      - for example in examples/*/; do echo "Testing $$example"; ./{{.APP_NAME}} "$$example" || true; done
+      - echo "✅ Example testing complete!"
+
+  demo-complex:
+    desc: 🎬 Demo analyzer on complex webapp example
+    deps: [build]
+    cmds:
+      - echo "🎬 Running demo on complex webapp example..."
+      - ./{{.APP_NAME}} examples/complex-webapp
+      - echo "📁 Results available in examples/complex-webapp/.discovery/"
+      - echo "🌐 Open examples/complex-webapp/.discovery/pipeline-analyzer/index.html in browser"
+      - echo "📝 Or view examples/complex-webapp/.discovery/pipeline-analyzer/README.md"
+
+  open-example:
+    desc: 🌐 Open complex webapp analysis in browser
+    cmds:
+      - open examples/complex-webapp/.discovery/pipeline-analyzer/index.html
+
+  clean-examples:
+    desc: 🧹 Clean up all example analysis results
+    cmds:
+      - echo "🧹 Cleaning up example analysis results..."
+      - rm -rf examples/*/.discovery/
+      - echo "✅ Example cleanup complete!"

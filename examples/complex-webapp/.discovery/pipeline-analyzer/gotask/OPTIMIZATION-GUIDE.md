@@ -1,6 +1,6 @@
 # Task Optimization Guide
 
-**Generated:** 2025-08-21T08:39:03+01:00
+**Generated:** 2025-08-21T09:52:29+01:00
 
 ## 🎯 Optimization Overview
 
@@ -18,109 +18,13 @@ This guide provides specific recommendations to improve your Taskfile performanc
 
 These changes can significantly improve task execution speed:
 
-### Task: `deploy-prod`
+### Task: `test`
 
 **Opportunity:** Task could benefit from caching optimization
 
 **Implementation:**
 ```yaml
-deploy-prod:
-  desc: "Task description"
-  sources:
-    - "src/**/*.go"  # Add relevant source patterns
-  generates:
-    - "dist/app"     # Add output files
-  cmds:
-    - # existing commands
-```
-
-### Task: `dev`
-
-**Opportunity:** Task could benefit from caching optimization
-
-**Implementation:**
-```yaml
-dev:
-  desc: "Task description"
-  sources:
-    - "src/**/*.go"  # Add relevant source patterns
-  generates:
-    - "dist/app"     # Add output files
-  cmds:
-    - # existing commands
-```
-
-### Task: `test-e2e`
-
-**Opportunity:** Task could benefit from caching optimization
-
-**Implementation:**
-```yaml
-test-e2e:
-  desc: "Task description"
-  sources:
-    - "src/**/*.go"  # Add relevant source patterns
-  generates:
-    - "dist/app"     # Add output files
-  cmds:
-    - # existing commands
-```
-
-### Task: `security-scan`
-
-**Opportunity:** Task could benefit from caching optimization
-
-**Implementation:**
-```yaml
-security-scan:
-  desc: "Task description"
-  sources:
-    - "src/**/*.go"  # Add relevant source patterns
-  generates:
-    - "dist/app"     # Add output files
-  cmds:
-    - # existing commands
-```
-
-### Task: `performance-test`
-
-**Opportunity:** Task could benefit from caching optimization
-
-**Implementation:**
-```yaml
-performance-test:
-  desc: "Task description"
-  sources:
-    - "src/**/*.go"  # Add relevant source patterns
-  generates:
-    - "dist/app"     # Add output files
-  cmds:
-    - # existing commands
-```
-
-### Task: `clean`
-
-**Opportunity:** Task could benefit from caching optimization
-
-**Implementation:**
-```yaml
-clean:
-  desc: "Task description"
-  sources:
-    - "src/**/*.go"  # Add relevant source patterns
-  generates:
-    - "dist/app"     # Add output files
-  cmds:
-    - # existing commands
-```
-
-### Task: `deploy-staging`
-
-**Opportunity:** Task could benefit from caching optimization
-
-**Implementation:**
-```yaml
-deploy-staging:
+test:
   desc: "Task description"
   sources:
     - "src/**/*.go"  # Add relevant source patterns
@@ -162,13 +66,77 @@ lint-frontend:
     - # existing commands
 ```
 
-### Task: `test`
+### Task: `deploy-staging`
 
 **Opportunity:** Task could benefit from caching optimization
 
 **Implementation:**
 ```yaml
-test:
+deploy-staging:
+  desc: "Task description"
+  sources:
+    - "src/**/*.go"  # Add relevant source patterns
+  generates:
+    - "dist/app"     # Add output files
+  cmds:
+    - # existing commands
+```
+
+### Task: `performance-test`
+
+**Opportunity:** Task could benefit from caching optimization
+
+**Implementation:**
+```yaml
+performance-test:
+  desc: "Task description"
+  sources:
+    - "src/**/*.go"  # Add relevant source patterns
+  generates:
+    - "dist/app"     # Add output files
+  cmds:
+    - # existing commands
+```
+
+### Task: `dev`
+
+**Opportunity:** Task could benefit from caching optimization
+
+**Implementation:**
+```yaml
+dev:
+  desc: "Task description"
+  sources:
+    - "src/**/*.go"  # Add relevant source patterns
+  generates:
+    - "dist/app"     # Add output files
+  cmds:
+    - # existing commands
+```
+
+### Task: `test-e2e`
+
+**Opportunity:** Task could benefit from caching optimization
+
+**Implementation:**
+```yaml
+test-e2e:
+  desc: "Task description"
+  sources:
+    - "src/**/*.go"  # Add relevant source patterns
+  generates:
+    - "dist/app"     # Add output files
+  cmds:
+    - # existing commands
+```
+
+### Task: `deploy-prod`
+
+**Opportunity:** Task could benefit from caching optimization
+
+**Implementation:**
+```yaml
+deploy-prod:
   desc: "Task description"
   sources:
     - "src/**/*.go"  # Add relevant source patterns
@@ -201,6 +169,38 @@ lint-backend:
 **Implementation:**
 ```yaml
 build-docker:
+  desc: "Task description"
+  sources:
+    - "src/**/*.go"  # Add relevant source patterns
+  generates:
+    - "dist/app"     # Add output files
+  cmds:
+    - # existing commands
+```
+
+### Task: `security-scan`
+
+**Opportunity:** Task could benefit from caching optimization
+
+**Implementation:**
+```yaml
+security-scan:
+  desc: "Task description"
+  sources:
+    - "src/**/*.go"  # Add relevant source patterns
+  generates:
+    - "dist/app"     # Add output files
+  cmds:
+    - # existing commands
+```
+
+### Task: `clean`
+
+**Opportunity:** Task could benefit from caching optimization
+
+**Implementation:**
+```yaml
+clean:
   desc: "Task description"
   sources:
     - "src/**/*.go"  # Add relevant source patterns

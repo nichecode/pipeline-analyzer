@@ -1,7 +1,7 @@
 # Workflow: CI/CD Pipeline
 
 **File:** ci.yml  
-**Generated:** 2025-08-21T08:39:03+01:00
+**Generated:** 2025-08-21T09:52:29+01:00
 
 ## 📊 Overview
 
@@ -28,10 +28,6 @@
 
 These command patterns are good candidates for go-task consolidation:
 
-### python (1 commands)
-
-- `python -m pytest tests/ --cov=. --cov-report=xml`
-
 ### docker (3 commands)
 
 - `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
@@ -57,6 +53,10 @@ These command patterns are good candidates for go-task consolidation:
 - `cd api`
 - `aquasec/trivy image webapp-frontend:${{ github.sha }}`
 - `echo "Deploying to staging..."`
+
+### python (1 commands)
+
+- `python -m pytest tests/ --cov=. --cov-report=xml`
 
 
 ## 🔍 Navigation

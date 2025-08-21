@@ -1,6 +1,6 @@
 # CircleCI → go-task Migration Checklist
 
-**Generated:** 2025-08-21T10:47:48+01:00
+**Generated:** 2025-08-21T11:11:51+01:00
 
 ## 🎯 Migration Overview
 

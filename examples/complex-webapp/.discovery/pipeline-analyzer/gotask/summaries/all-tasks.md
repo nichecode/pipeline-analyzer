@@ -42,30 +42,21 @@ Total tasks found: **23**
 - [deploy-prod](../tasks/deploy-prod.md)
 - [deploy-staging](../tasks/deploy-staging.md)
 
-### Test (6 tasks)
-
-- [performance-test](../tasks/performance-test.md)
-- [test](../tasks/test.md)
-- [test-backend](../tasks/test-backend.md)
-- [test-e2e](../tasks/test-e2e.md)
-- [test-frontend](../tasks/test-frontend.md)
-- [test-integration](../tasks/test-integration.md)
-
 ### Quality (3 tasks)
 
 - [lint](../tasks/lint.md)
 - [lint-backend](../tasks/lint-backend.md)
 - [lint-frontend](../tasks/lint-frontend.md)
 
+### Utility (1 tasks)
+
+- [security-scan](../tasks/security-scan.md)
+
 ### Containerization (3 tasks)
 
 - [dev](../tasks/dev.md)
 - [start-services](../tasks/start-services.md)
 - [stop-services](../tasks/stop-services.md)
-
-### Utility (1 tasks)
-
-- [security-scan](../tasks/security-scan.md)
 
 ### Cleanup (1 tasks)
 
@@ -76,6 +67,15 @@ Total tasks found: **23**
 - [install](../tasks/install.md)
 - [install-backend](../tasks/install-backend.md)
 - [install-frontend](../tasks/install-frontend.md)
+
+### Test (6 tasks)
+
+- [performance-test](../tasks/performance-test.md)
+- [test](../tasks/test.md)
+- [test-backend](../tasks/test-backend.md)
+- [test-e2e](../tasks/test-e2e.md)
+- [test-frontend](../tasks/test-frontend.md)
+- [test-integration](../tasks/test-integration.md)
 
 ## Navigation
 

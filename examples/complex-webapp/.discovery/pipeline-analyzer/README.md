@@ -1,12 +1,12 @@
 # Pipeline Analysis Discovery Report
 
 **Repository:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp  
-**Generated:** 2025-08-21T10:47:48+01:00  
+**Generated:** 2025-08-21T11:11:51+01:00  
 **Git Repository:** false
 
 ## 🔍 Discovered Build Tools
 
-Found **4** build tools in this repository:
+Found **5** build tools in this repository:
 
 | Tool | Type | Status | Analysis |
 |------|------|--------|----------|
@@ -14,6 +14,7 @@ Found **4** build tools in this repository:
 | Go Task | gotask | ✅ Success | [View Analysis](gotask/README.md) |
 | GitHub Actions | github-actions | ✅ Success | [View Analysis](github-actions/README.md) |
 | npm | npm | ✅ Success | [View Analysis](npm/README.md) |
+| Docker | docker | ✅ Success | [View Analysis](docker/README.md) |
 
 
 ## 📁 Directory Structure
@@ -24,6 +25,7 @@ Each discovered tool has its own analysis directory:
 - [gotask/](gotask/) - Go Task analysis
 - [github-actions/](github-actions/) - GitHub Actions analysis
 - [npm/](npm/) - npm analysis
+- [docker/](docker/) - Docker analysis
 
 
 ## 🚀 Getting Started

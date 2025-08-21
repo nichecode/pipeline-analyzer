@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nichecode/pipeline-analyzer/internal/circleci"
+	"github.com/nichecode/pipeline-analyzer/internal/docker"
 	"github.com/nichecode/pipeline-analyzer/internal/githubactions"
 	"github.com/nichecode/pipeline-analyzer/internal/gotask"
 	"github.com/nichecode/pipeline-analyzer/internal/shared"
@@ -67,17 +68,24 @@ func (a *Analyzer) analyzeTool(tool BuildTool) AnalysisResult {
 	}
 
 	// Get the full config path
-	configPath := filepath.Join(a.repository.RootPath, tool.ConfigPath)
-	
-	// Verify config file exists
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		errMsg := fmt.Sprintf("config file not found: %s", configPath)
-		logger.Error("Discovery", errMsg, map[string]interface{}{
-			"tool_type":   tool.Type,
-			"config_path": configPath,
-		})
-		result.Error = errMsg
-		return result
+	var configPath string
+	if tool.Type == "docker" {
+		// For Docker, ConfigPath is already the full root path from scanner
+		configPath = tool.ConfigPath
+	} else {
+		// For other tools, join with repository root
+		configPath = filepath.Join(a.repository.RootPath, tool.ConfigPath)
+		
+		// Verify config file exists (skip for Docker since it's directory-based)
+		if _, err := os.Stat(configPath); os.IsNotExist(err) {
+			errMsg := fmt.Sprintf("config file not found: %s", configPath)
+			logger.Error("Discovery", errMsg, map[string]interface{}{
+				"tool_type":   tool.Type,
+				"config_path": configPath,
+			})
+			result.Error = errMsg
+			return result
+		}
 	}
 
 	// Determine output directory
@@ -108,6 +116,16 @@ func (a *Analyzer) analyzeTool(tool BuildTool) AnalysisResult {
 
 	case "github-actions":
 		err := a.analyzeGitHubActions(configPath, outputDir)
+		if err != nil {
+			logger.AnalysisError(tool.Type, configPath, err)
+			result.Error = err.Error()
+		} else {
+			result.Success = true
+			logger.DiscoveryInfo(tool.Type, configPath, "Analysis completed successfully")
+		}
+
+	case "docker":
+		err := a.analyzeDocker(configPath, outputDir)
 		if err != nil {
 			logger.AnalysisError(tool.Type, configPath, err)
 			result.Error = err.Error()
@@ -271,6 +289,38 @@ func (a *Analyzer) analyzeGitHubActions(configPath, outputDir string) error {
 	// Generate markdown documentation for all workflows
 	writer := githubactions.NewWriter(outputDir)
 	if err := writer.WriteAllFiles(allResults, configPath); err != nil {
+		return fmt.Errorf("failed to write analysis files: %w", err)
+	}
+
+	return nil
+}
+
+// analyzeDocker runs Docker analysis
+func (a *Analyzer) analyzeDocker(configPath, outputDir string) error {
+	// For Docker, configPath is the root path for Docker file discovery
+	// Use configPath directly since it's already the full path from the analyzer
+	analysis, err := docker.AnalyzeDocker(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to analyze Docker configurations: %w", err)
+	}
+
+	// Validate output directory
+	if err := docker.ValidateOutputDir(outputDir); err != nil {
+		return fmt.Errorf("output directory validation failed: %w", err)
+	}
+
+	fmt.Printf("✅ Docker analysis completed successfully\n")
+	fmt.Printf("   - Dockerfiles: %d\n", len(analysis.Dockerfiles))
+	fmt.Printf("   - Multi-stage builds: %d\n", analysis.Summary.MultiStageBuilds)
+	if analysis.DockerCompose != nil {
+		fmt.Printf("   - Docker Compose services: %d\n", analysis.DockerCompose.ServiceCount)
+	}
+	fmt.Printf("   - Security issues: %d\n", analysis.Summary.SecurityIssues)
+	fmt.Printf("   - Overall score: %d/100\n", analysis.Summary.OverallScore)
+
+	// Create writer and generate all files
+	writer := docker.NewWriter(outputDir)
+	if err := writer.WriteAllFiles(analysis, configPath); err != nil {
 		return fmt.Errorf("failed to write analysis files: %w", err)
 	}
 

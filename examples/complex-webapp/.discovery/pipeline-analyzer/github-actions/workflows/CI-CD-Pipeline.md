@@ -1,7 +1,7 @@
 # Workflow: CI/CD Pipeline
 
 **File:** ci.yml  
-**Generated:** 2025-08-21T10:47:48+01:00
+**Generated:** 2025-08-21T11:11:51+01:00
 
 ## 📊 Overview
 
@@ -20,37 +20,37 @@
 
 | Job | Runner | Steps | Commands | Actions |
 |-----|--------|-------|----------|---------|
+| [build-and-deploy](../jobs/build-and-deploy.md) | ubuntu-latest | 6 | 8 | 2 |
 | [test-frontend](../jobs/test-frontend.md) | ubuntu-latest | 6 | 3 | 3 |
 | [test-backend](../jobs/test-backend.md) | ubuntu-latest | 4 | 4 | 2 |
-| [build-and-deploy](../jobs/build-and-deploy.md) | ubuntu-latest | 6 | 8 | 2 |
 
 ## ⚡ Command Patterns Detected
 
 These command patterns are good candidates for go-task consolidation:
 
-### npm (6 commands)
+### shell (3 commands)
 
-- `npm ci`
-- `npm run lint`
-- `npm run test:coverage`
-- `npm ci`
-- `npm run build:prod`
-- `npm audit --audit-level=moderate`
+- `aquasec/trivy image webapp-frontend:${{ github.sha }}`
+- `echo "Deploying to staging..."`
+- `cd api`
 
 ### pip (2 commands)
 
 - `pip install -r api/requirements.txt`
 - `pip install -r api/requirements-dev.txt`
 
-### shell (3 commands)
-
-- `cd api`
-- `aquasec/trivy image webapp-frontend:${{ github.sha }}`
-- `echo "Deploying to staging..."`
-
 ### python (1 commands)
 
 - `python -m pytest tests/ --cov=. --cov-report=xml`
+
+### npm (6 commands)
+
+- `npm ci`
+- `npm run build:prod`
+- `npm audit --audit-level=moderate`
+- `npm ci`
+- `npm run lint`
+- `npm run test:coverage`
 
 ### docker (3 commands)
 

@@ -132,7 +132,7 @@ func (s *Scanner) discoverBuildTools() ([]BuildTool, error) {
 		{
 			toolType:    "docker",
 			name:        "Docker",
-			patterns:    []string{"Dockerfile", "docker-compose.yml", "docker-compose.yaml"},
+			patterns:    []string{"**/Dockerfile", "Dockerfile", "docker-compose.yml", "docker-compose.yaml"},
 			description: "Docker containerization",
 		},
 		{
@@ -176,10 +176,13 @@ func (s *Scanner) discoverBuildTools() ([]BuildTool, error) {
 			var toolKey string
 			var configPath string
 			
-			// Special handling for GitHub Actions - group all workflows under one entry
+			// Special handling for GitHub Actions and Docker - group multiple files under one entry
 			if pattern.toolType == "github-actions" {
 				toolKey = "github-actions"
 				configPath = filepath.Dir(file) // Use .github/workflows directory
+			} else if pattern.toolType == "docker" {
+				toolKey = "docker"
+				configPath = s.rootPath // Use root path for Docker analysis
 			} else {
 				toolKey = pattern.toolType + ":" + file
 				configPath = file
@@ -207,8 +210,27 @@ func (s *Scanner) findFiles(patterns []string) ([]string, error) {
 	var foundFiles []string
 
 	for _, pattern := range patterns {
-		// Handle glob patterns for workflows
-		if strings.Contains(pattern, "*") {
+		if strings.HasPrefix(pattern, "**/") {
+			// Handle recursive patterns like **/Dockerfile
+			target := strings.TrimPrefix(pattern, "**/")
+			err := filepath.Walk(s.rootPath, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if !info.IsDir() && info.Name() == target {
+					// Convert to relative path
+					relPath, err := filepath.Rel(s.rootPath, path)
+					if err == nil {
+						foundFiles = append(foundFiles, relPath)
+					}
+				}
+				return nil
+			})
+			if err != nil {
+				return nil, err
+			}
+		} else if strings.Contains(pattern, "*") {
+			// Handle glob patterns for workflows
 			matches, err := filepath.Glob(filepath.Join(s.rootPath, pattern))
 			if err != nil {
 				return nil, err

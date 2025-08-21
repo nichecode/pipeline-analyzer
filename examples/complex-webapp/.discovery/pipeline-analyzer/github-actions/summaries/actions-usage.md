@@ -4,8 +4,8 @@
 
 | Action | Usage Count | Jobs Using |
 |--------|-------------|------------|
-| `actions/checkout@v4` | 3 | test-frontend, test-backend, build-and-deploy |
-| `actions/setup-node@v4` | 2 | test-frontend, build-and-deploy |
+| `actions/checkout@v4` | 3 | build-and-deploy, test-frontend, test-backend |
+| `actions/setup-node@v4` | 2 | build-and-deploy, test-frontend |
 | `codecov/codecov-action@v4` | 1 | test-frontend |
 | `actions/setup-python@v4` | 1 | test-backend |
 

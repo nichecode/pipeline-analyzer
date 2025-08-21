@@ -1,6 +1,6 @@
 # CircleCI Analysis Report
 
-**Generated:** 2025-08-21T10:47:48+01:00
+**Generated:** 2025-08-21T11:11:51+01:00
 **Config:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/.circleci/config.yml
 
 ## 📊 Overview
@@ -61,12 +61,12 @@ Workflow structure and job dependencies:
 | Job | Usage Count | Link |
 |-----|-------------|------|
 | security-scan | 3 | [View Details](jobs/security-scan.md) |
-| test-e2e | 2 | [View Details](jobs/test-e2e.md) |
 | test-performance | 2 | [View Details](jobs/test-performance.md) |
-| lint-backend | 1 | [View Details](jobs/lint-backend.md) |
-| test-frontend | 1 | [View Details](jobs/test-frontend.md) |
+| test-e2e | 2 | [View Details](jobs/test-e2e.md) |
+| lint-frontend | 1 | [View Details](jobs/lint-frontend.md) |
+| deploy-staging | 1 | [View Details](jobs/deploy-staging.md) |
 | test-backend | 1 | [View Details](jobs/test-backend.md) |
 | test-integration | 1 | [View Details](jobs/test-integration.md) |
-| build-docker-images | 1 | [View Details](jobs/build-docker-images.md) |
-| deploy-staging | 1 | [View Details](jobs/deploy-staging.md) |
 | deploy-production | 1 | [View Details](jobs/deploy-production.md) |
+| build-backend | 1 | [View Details](jobs/build-backend.md) |
+| hold-for-approval | 1 | [View Details](jobs/hold-for-approval.md) |

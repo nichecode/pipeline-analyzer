@@ -376,7 +376,9 @@ func GenerateTaskMarkdown(taskAnalysis *TaskAnalysis) string {
 	if len(taskAnalysis.Commands) > 0 {
 		sb.WriteString("## ⚡ Commands\n\n")
 		for i, command := range taskAnalysis.Commands {
-			sb.WriteString(fmt.Sprintf("### Command %d\n\n", i+1))
+			if len(taskAnalysis.Commands) > 1 {
+				sb.WriteString(fmt.Sprintf("**Command %d:**\n", i+1))
+			}
 			sb.WriteString("```bash\n")
 			sb.WriteString(command)
 			sb.WriteString("\n```\n\n")

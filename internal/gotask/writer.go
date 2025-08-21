@@ -200,25 +200,25 @@ func generateIncludeMarkdown(includeName string, includeAnalysis *IncludeAnalysi
 	// Show individual tasks from the included file
 	if len(includeAnalysis.Tasks) > 0 {
 		content += "## 📋 Included Tasks\n\n"
-		
+
 		// Create a sorted list of task names
 		var taskNames []string
 		for taskName := range includeAnalysis.Tasks {
 			taskNames = append(taskNames, taskName)
 		}
 		sort.Strings(taskNames)
-		
+
 		content += "| Task | Description | Commands | Type |\n"
 		content += "|------|-------------|----------|------|\n"
-		
+
 		for _, taskName := range taskNames {
 			taskAnalysis := includeAnalysis.Tasks[taskName]
-			
+
 			description := taskAnalysis.Description
 			if description == "" {
 				description = "*No description*"
 			}
-			
+
 			commandCount := len(taskAnalysis.Commands)
 			commandsText := fmt.Sprintf("%d commands", commandCount)
 			if commandCount == 0 {
@@ -228,29 +228,30 @@ func generateIncludeMarkdown(includeName string, includeAnalysis *IncludeAnalysi
 					commandsText = "No commands"
 				}
 			}
-			
-			content += fmt.Sprintf("| **%s** | %s | %s | %s |\n", 
+
+			content += fmt.Sprintf("| **%s** | %s | %s | %s |\n",
 				taskName, description, commandsText, taskAnalysis.Type)
 		}
 		content += "\n"
-		
+
 		// Show detailed commands for each task
 		content += "## ⚡ Task Commands\n\n"
-		
+
 		for _, taskName := range taskNames {
 			taskAnalysis := includeAnalysis.Tasks[taskName]
-			
+
 			content += fmt.Sprintf("### %s\n\n", taskName)
-			
+
 			if taskAnalysis.Description != "" {
 				content += fmt.Sprintf("**Description:** %s\n\n", taskAnalysis.Description)
 			}
-			
+
 			// Show commands or explain why there are none
 			if len(taskAnalysis.Commands) > 0 {
 				content += "**Commands:**\n\n"
 				for i, command := range taskAnalysis.Commands {
-					content += fmt.Sprintf("%d. ```bash\n%s\n```\n\n", i+1, command)
+					content += fmt.Sprintf("Command 1 %d. \n\n", i+1)
+					content += fmt.Sprintf("```bash\n%s\n```\n\n", command)
 				}
 			} else if len(taskAnalysis.Dependencies) > 0 {
 				content += "**Type:** Dependency-only task\n\n"
@@ -262,7 +263,7 @@ func generateIncludeMarkdown(includeName string, includeAnalysis *IncludeAnalysi
 			} else {
 				content += "**Status:** ⚠️ No commands or dependencies defined\n\n"
 			}
-			
+
 			// Show additional task properties if available
 			if len(taskAnalysis.Sources) > 0 {
 				content += "**Sources:** " + fmt.Sprintf("%v", taskAnalysis.Sources) + "\n\n"
@@ -334,7 +335,7 @@ func PrintSummary(analysis *Analysis, outputDir string) {
 	fmt.Printf("   - Includes found: %d\n", analysis.TotalIncludes)
 
 	metrics := GetPerformanceMetrics(analysis.Taskfile)
-	fmt.Printf("   - Tasks with caching: %d (%.1f%%)\n", 
+	fmt.Printf("   - Tasks with caching: %d (%.1f%%)\n",
 		metrics.TasksWithCaching, float64(metrics.TasksWithCaching)/float64(analysis.TotalTasks)*100)
 
 	if len(analysis.CircularDeps) > 0 {

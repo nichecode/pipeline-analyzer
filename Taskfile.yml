@@ -17,7 +17,8 @@ tasks:
       - echo "🚀 Pipeline Analyzer - Auto-Discovery Build Tool Analysis"
       - echo ""
       - echo "📦 INSTALLATION (Recommended):"
-      - echo "   go install github.com/nichecode/pipeline-analyzer/cmd/pipeline-analyzer@latest"
+      - echo "   git clone https://github.com/nichecode/pipeline-analyzer.git"
+      - echo "   cd pipeline-analyzer && task install"
       - echo ""
       - echo "🎯 USAGE:"
       - echo "   pipeline-analyzer                    (analyze current directory)"
@@ -52,8 +53,8 @@ tasks:
     cmds:
       - echo "📦 Installing {{.APP_NAME}} with go install..."
       - go install ./cmd/{{.APP_NAME}}
-      - echo "✅ Installed {{.APP_NAME}} via go install"
-      - echo "💡 Make sure $GOPATH/bin is in your PATH"
+      - echo "✅ Installed {{.APP_NAME}} to $(go env GOPATH)/bin/"
+      - echo "💡 Make sure $(go env GOPATH)/bin is in your PATH"
       - echo "💡 Now you can run '{{.APP_NAME}}' from anywhere!"
 
   install-dev:

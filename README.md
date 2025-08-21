@@ -18,8 +18,23 @@ CircleCI/GitHub Actions → calls `task build` → Taskfile.yml runs commands
 
 ### Installation
 
+**Option 1: From source (recommended)**
+```bash
+git clone https://github.com/nichecode/pipeline-analyzer.git
+cd pipeline-analyzer
+go install ./cmd/pipeline-analyzer
+```
+
+**Option 2: Direct install (requires public repo with releases)**
 ```bash
 go install github.com/nichecode/pipeline-analyzer/cmd/pipeline-analyzer@latest
+```
+
+**Option 3: Using go-task**
+```bash
+git clone https://github.com/nichecode/pipeline-analyzer.git
+cd pipeline-analyzer
+task install
 ```
 
 ### Usage

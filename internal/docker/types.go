@@ -118,10 +118,28 @@ type ComposeAnalysisResults struct {
 	ComplexityScore    int                       `json:"complexity_score"`
 }
 
+// DockerUsageReference represents where a Docker file is used
+type DockerUsageReference struct {
+	Tool        string `json:"tool"`        // "circleci", "github-actions", "gotask"
+	File        string `json:"file"`        // Config file path
+	Location    string `json:"location"`    // Specific location (job name, task name, etc.)
+	Command     string `json:"command"`     // The actual command found
+	Context     string `json:"context"`     // Additional context if available
+}
+
+// DockerUsageAnalysis tracks where Docker files are referenced
+type DockerUsageAnalysis struct {
+	DockerfileReferences    []*DockerUsageReference `json:"dockerfile_references"`
+	DockerComposeReferences []*DockerUsageReference `json:"docker_compose_references"`
+	DockerCommandReferences []*DockerUsageReference `json:"docker_command_references"`
+	TotalReferences         int                     `json:"total_references"`
+}
+
 // DockerAnalysis aggregates all Docker-related analysis
 type DockerAnalysis struct {
 	Dockerfiles     []*DockerfileAnalysis      `json:"dockerfiles"`
 	DockerCompose   *DockerComposeAnalysis     `json:"docker_compose"`
+	Usage           *DockerUsageAnalysis       `json:"usage"`
 	Summary         *DockerSummary             `json:"summary"`
 	GeneratedAt     time.Time                  `json:"generated_at"`
 }

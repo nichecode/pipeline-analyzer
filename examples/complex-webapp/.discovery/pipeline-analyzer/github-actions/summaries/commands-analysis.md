@@ -2,13 +2,17 @@
 
 ## ⚡ Command Patterns Suitable for go-task
 
+### python (1 commands)
+
+- `python -m pytest tests/ --cov=. --cov-report=xml`
+
 ### npm (6 commands)
 
+- `npm ci`
 - `npm run build:prod`
 - `npm audit --audit-level=moderate`
 - `npm run lint`
 - `npm run test:coverage`
-- `npm ci`
 
 ### docker (3 commands)
 
@@ -18,18 +22,14 @@
 
 ### shell (3 commands)
 
+- `echo "Deploying to staging..."`
 - `cd api`
 - `aquasec/trivy image webapp-frontend:${{ github.sha }}`
-- `echo "Deploying to staging..."`
 
 ### pip (2 commands)
 
 - `pip install -r api/requirements.txt`
 - `pip install -r api/requirements-dev.txt`
-
-### python (1 commands)
-
-- `python -m pytest tests/ --cov=. --cov-report=xml`
 
 
 ## 🔍 Navigation

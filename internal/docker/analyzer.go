@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -41,6 +43,9 @@ func AnalyzeDocker(rootPath string) (*DockerAnalysis, error) {
 			analysis.DockerCompose = composeAnalysis
 		}
 	}
+
+	// Analyze Docker usage across other tools
+	analysis.Usage = analyzeDockerUsage(rootPath, analysis)
 
 	// Generate summary
 	analysis.Summary = generateDockerSummary(analysis)
@@ -246,4 +251,207 @@ func ValidateOutputDir(outputDir string) error {
 	os.Remove(testFile)
 
 	return nil
+}
+
+// analyzeDockerUsage analyzes how Docker files are used across other build tools
+func analyzeDockerUsage(rootPath string, analysis *DockerAnalysis) *DockerUsageAnalysis {
+	usage := &DockerUsageAnalysis{
+		DockerfileReferences:    []*DockerUsageReference{},
+		DockerComposeReferences: []*DockerUsageReference{},
+		DockerCommandReferences: []*DockerUsageReference{},
+		TotalReferences:         0,
+	}
+
+	// Search for Docker usage in various tools
+	searchCircleCIUsage(rootPath, analysis, usage)
+	searchGitHubActionsUsage(rootPath, analysis, usage)
+	searchGoTaskUsage(rootPath, analysis, usage)
+
+	// Update total references
+	usage.TotalReferences = len(usage.DockerfileReferences) + 
+		len(usage.DockerComposeReferences) + 
+		len(usage.DockerCommandReferences)
+
+	return usage
+}
+
+// searchCircleCIUsage searches for Docker references in CircleCI configuration
+func searchCircleCIUsage(rootPath string, analysis *DockerAnalysis, usage *DockerUsageAnalysis) {
+	circleCIConfig := filepath.Join(rootPath, ".circleci", "config.yml")
+	if content, err := os.ReadFile(circleCIConfig); err == nil {
+		text := string(content)
+		
+		// Search for docker build commands
+		dockerBuildRegex := regexp.MustCompile(`docker\s+build\s+[^\n]*`)
+		matches := dockerBuildRegex.FindAllString(text, -1)
+		for _, match := range matches {
+			usage.DockerCommandReferences = append(usage.DockerCommandReferences, &DockerUsageReference{
+				Tool:     "circleci",
+				File:     ".circleci/config.yml",
+				Location: "job",
+				Command:  strings.TrimSpace(match),
+				Context:  "Docker build command",
+			})
+		}
+		
+		// Search for docker-compose commands
+		composeRegex := regexp.MustCompile(`docker-compose\s+[^\n]*`)
+		matches = composeRegex.FindAllString(text, -1)
+		for _, match := range matches {
+			usage.DockerComposeReferences = append(usage.DockerComposeReferences, &DockerUsageReference{
+				Tool:     "circleci",
+				File:     ".circleci/config.yml",
+				Location: "job",
+				Command:  strings.TrimSpace(match),
+				Context:  "Docker Compose command",
+			})
+		}
+		
+		// Search for specific Dockerfile references
+		for _, dockerfile := range analysis.Dockerfiles {
+			dockerfileRelPath, _ := filepath.Rel(rootPath, dockerfile.FilePath)
+			if strings.Contains(text, dockerfileRelPath) {
+				usage.DockerfileReferences = append(usage.DockerfileReferences, &DockerUsageReference{
+					Tool:     "circleci",
+					File:     ".circleci/config.yml",
+					Location: "job",
+					Command:  dockerfileRelPath,
+					Context:  "Dockerfile reference",
+				})
+			}
+		}
+	}
+}
+
+// searchGitHubActionsUsage searches for Docker references in GitHub Actions workflows
+func searchGitHubActionsUsage(rootPath string, analysis *DockerAnalysis, usage *DockerUsageAnalysis) {
+	workflowsDir := filepath.Join(rootPath, ".github", "workflows")
+	if files, err := filepath.Glob(filepath.Join(workflowsDir, "*.yml")); err == nil {
+		for _, file := range files {
+			if content, err := os.ReadFile(file); err == nil {
+				text := string(content)
+				relFile, _ := filepath.Rel(rootPath, file)
+				
+				// Search for docker build commands
+				dockerBuildRegex := regexp.MustCompile(`docker\s+build\s+[^\n]*`)
+				matches := dockerBuildRegex.FindAllString(text, -1)
+				for _, match := range matches {
+					usage.DockerCommandReferences = append(usage.DockerCommandReferences, &DockerUsageReference{
+						Tool:     "github-actions",
+						File:     relFile,
+						Location: "step",
+						Command:  strings.TrimSpace(match),
+						Context:  "Docker build command",
+					})
+				}
+				
+				// Search for docker-compose commands
+				composeRegex := regexp.MustCompile(`docker-compose\s+[^\n]*`)
+				matches = composeRegex.FindAllString(text, -1)
+				for _, match := range matches {
+					usage.DockerComposeReferences = append(usage.DockerComposeReferences, &DockerUsageReference{
+						Tool:     "github-actions",
+						File:     relFile,
+						Location: "step",
+						Command:  strings.TrimSpace(match),
+						Context:  "Docker Compose command",
+					})
+				}
+				
+				// Search for specific Dockerfile references
+				for _, dockerfile := range analysis.Dockerfiles {
+					dockerfileRelPath, _ := filepath.Rel(rootPath, dockerfile.FilePath)
+					if strings.Contains(text, dockerfileRelPath) {
+						usage.DockerfileReferences = append(usage.DockerfileReferences, &DockerUsageReference{
+							Tool:     "github-actions",
+							File:     relFile,
+							Location: "step",
+							Command:  dockerfileRelPath,
+							Context:  "Dockerfile reference",
+						})
+					}
+				}
+			}
+		}
+	}
+	
+	// Also check for .yaml files
+	if files, err := filepath.Glob(filepath.Join(workflowsDir, "*.yaml")); err == nil {
+		for _, file := range files {
+			if content, err := os.ReadFile(file); err == nil {
+				text := string(content)
+				relFile, _ := filepath.Rel(rootPath, file)
+				
+				// Search for docker build commands
+				dockerBuildRegex := regexp.MustCompile(`docker\s+build\s+[^\n]*`)
+				matches := dockerBuildRegex.FindAllString(text, -1)
+				for _, match := range matches {
+					usage.DockerCommandReferences = append(usage.DockerCommandReferences, &DockerUsageReference{
+						Tool:     "github-actions",
+						File:     relFile,
+						Location: "step",
+						Command:  strings.TrimSpace(match),
+						Context:  "Docker build command",
+					})
+				}
+			}
+		}
+	}
+}
+
+// searchGoTaskUsage searches for Docker references in Taskfile configurations  
+func searchGoTaskUsage(rootPath string, analysis *DockerAnalysis, usage *DockerUsageAnalysis) {
+	taskfiles := []string{
+		filepath.Join(rootPath, "Taskfile.yml"),
+		filepath.Join(rootPath, "Taskfile.yaml"),
+		filepath.Join(rootPath, "taskfile.yml"), 
+		filepath.Join(rootPath, "taskfile.yaml"),
+	}
+	
+	for _, taskfile := range taskfiles {
+		if content, err := os.ReadFile(taskfile); err == nil {
+			text := string(content)
+			relFile, _ := filepath.Rel(rootPath, taskfile)
+			
+			// Search for docker build commands
+			dockerBuildRegex := regexp.MustCompile(`docker\s+build\s+[^\n]*`)
+			matches := dockerBuildRegex.FindAllString(text, -1)
+			for _, match := range matches {
+				usage.DockerCommandReferences = append(usage.DockerCommandReferences, &DockerUsageReference{
+					Tool:     "gotask",
+					File:     relFile,
+					Location: "task",
+					Command:  strings.TrimSpace(match),
+					Context:  "Docker build command",
+				})
+			}
+			
+			// Search for docker-compose commands
+			composeRegex := regexp.MustCompile(`docker-compose\s+[^\n]*`)
+			matches = composeRegex.FindAllString(text, -1)
+			for _, match := range matches {
+				usage.DockerComposeReferences = append(usage.DockerComposeReferences, &DockerUsageReference{
+					Tool:     "gotask",
+					File:     relFile,
+					Location: "task",
+					Command:  strings.TrimSpace(match),
+					Context:  "Docker Compose command",
+				})
+			}
+			
+			// Search for specific Dockerfile references
+			for _, dockerfile := range analysis.Dockerfiles {
+				dockerfileRelPath, _ := filepath.Rel(rootPath, dockerfile.FilePath)
+				if strings.Contains(text, dockerfileRelPath) {
+					usage.DockerfileReferences = append(usage.DockerfileReferences, &DockerUsageReference{
+						Tool:     "gotask",
+						File:     relFile,
+						Location: "task",
+						Command:  dockerfileRelPath,
+						Context:  "Dockerfile reference",
+					})
+				}
+			}
+		}
+	}
 }

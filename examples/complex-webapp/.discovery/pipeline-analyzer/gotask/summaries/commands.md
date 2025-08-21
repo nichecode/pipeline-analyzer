@@ -8,22 +8,22 @@
 | docker-compose | 6 | 5 | containerization |
 | docker | 3 | 2 | containerization |
 | python | 3 | 3 | runtime |
-| pip | 2 | 1 | package-management |
 | kubectl | 2 | 2 | deployment |
+| pip | 2 | 1 | package-management |
 
 ## Most Common Commands
 
 | Command | Usage Count | Description |
 |---------|-------------|-------------|
 | `npm` | 11 | Shell command |
-| `cd` | 6 | Shell command |
 | `docker-compose` | 6 | Docker Compose orchestration commands |
+| `cd` | 6 | Shell command |
 | `rm` | 3 | Shell command |
 | `docker` | 3 | Shell command |
-| `trivy` | 2 | Shell command |
-| `echo` | 2 | Shell command |
 | `kubectl` | 2 | Shell command |
 | `pip` | 2 | Shell command |
+| `echo` | 2 | Shell command |
+| `trivy` | 2 | Shell command |
 | `npx` | 1 | Shell command |
 | `sleep` | 1 | Shell command |
 | `if` | 1 | Shell command |

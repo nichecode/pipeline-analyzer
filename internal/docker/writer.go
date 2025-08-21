@@ -105,13 +105,21 @@ func (w *Writer) writeMainReadme(analysis *DockerAnalysis, configPath string) er
 	if len(analysis.Dockerfiles) > 0 {
 		content += "### 🐳 Dockerfiles\n\n"
 		for i, dockerfile := range analysis.Dockerfiles {
-			filename := filepath.Base(dockerfile.FilePath)
+			// Get relative path from repository root for better display
+			displayPath := dockerfile.FilePath
+			if filepath.IsAbs(dockerfile.FilePath) && configPath != "" {
+				// Make path relative to the repository root (configPath for Docker is the root)
+				if rel, err := filepath.Rel(configPath, dockerfile.FilePath); err == nil {
+					displayPath = rel
+				}
+			}
+			
 			stages := "single-stage"
 			if dockerfile.MultiStage {
 				stages = fmt.Sprintf("%d stages", len(dockerfile.Stages))
 			}
 			
-			content += fmt.Sprintf("- [%s](dockerfiles/dockerfile-%d.md) - %s build\n", filename, i+1, stages)
+			content += fmt.Sprintf("- [%s](dockerfiles/dockerfile-%d.md) - %s build\n", displayPath, i+1, stages)
 		}
 		content += "\n"
 	}
@@ -148,6 +156,42 @@ func (w *Writer) writeMainReadme(analysis *DockerAnalysis, configPath string) er
 			content += fmt.Sprintf("%d. %s\n", i+1, instruction)
 		}
 		content += "\n"
+	}
+
+	// Usage Analysis
+	if analysis.Usage != nil && analysis.Usage.TotalReferences > 0 {
+		content += "## 🔗 Usage Analysis\n\n"
+		content += fmt.Sprintf("Found **%d** references to Docker files across other build tools:\n\n", analysis.Usage.TotalReferences)
+		
+		// Dockerfile references
+		if len(analysis.Usage.DockerfileReferences) > 0 {
+			content += "### 🐳 Dockerfile References\n\n"
+			for _, ref := range analysis.Usage.DockerfileReferences {
+				content += fmt.Sprintf("- **%s** in `%s` (%s): `%s`\n", 
+					ref.Tool, ref.File, ref.Location, ref.Command)
+			}
+			content += "\n"
+		}
+		
+		// Docker Compose references
+		if len(analysis.Usage.DockerComposeReferences) > 0 {
+			content += "### 🔧 Docker Compose References\n\n"
+			for _, ref := range analysis.Usage.DockerComposeReferences {
+				content += fmt.Sprintf("- **%s** in `%s` (%s): `%s`\n", 
+					ref.Tool, ref.File, ref.Location, ref.Command)
+			}
+			content += "\n"
+		}
+		
+		// Docker command references
+		if len(analysis.Usage.DockerCommandReferences) > 0 {
+			content += "### ⚡ Docker Command References\n\n"
+			for _, ref := range analysis.Usage.DockerCommandReferences {
+				content += fmt.Sprintf("- **%s** in `%s` (%s): `%s`\n", 
+					ref.Tool, ref.File, ref.Location, ref.Command)
+			}
+			content += "\n"
+		}
 	}
 
 	// Recommendations

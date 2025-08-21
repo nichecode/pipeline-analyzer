@@ -1,6 +1,6 @@
 # GitHub Actions Analysis Report
 
-**Generated:** 2025-08-21T11:11:51+01:00
+**Generated:** 2025-08-21T11:32:40+01:00
 **Config Path:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/.github/workflows
 
 ## 📊 Overview

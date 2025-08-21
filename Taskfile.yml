@@ -1,0 +1,235 @@
+version: '3'
+
+vars:
+  APP_NAME: pipeline-analyzer
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+  BUILD_TIME:
+    sh: date -u '+%Y-%m-%d_%H:%M:%S'
+
+env:
+  CGO_ENABLED: 0
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  deps:
+    desc: 📦 Install dependencies
+    cmds:
+      - echo "📦 Installing dependencies..."
+      - go mod tidy
+      - go mod download
+      - go mod verify
+
+  build:
+    desc: 🔨 Build pipeline-analyzer
+    cmds:
+      - echo "🔨 Building {{.APP_NAME}}..."
+      - go build -ldflags "-X main.version={{.VERSION}} -X main.buildTime={{.BUILD_TIME}}" -o {{.APP_NAME}} ./cmd/{{.APP_NAME}}
+    sources:
+      - cmd/pipeline-analyzer/main.go
+      - internal/**/*.go
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.APP_NAME}}"
+
+  install:
+    desc: 📲 Install pipeline-analyzer to /usr/local/bin
+    deps: [build]
+    cmds:
+      - echo "📲 Installing {{.APP_NAME}}..."
+      - sudo cp {{.APP_NAME}} /usr/local/bin/
+      - echo "✅ Installed {{.APP_NAME}} to /usr/local/bin"
+      - echo "💡 Now you can run '{{.APP_NAME}}' from anywhere!"
+
+  install-local:
+    desc: 📲 Install pipeline-analyzer to ~/bin (no sudo required)
+    deps: [build]
+    cmds:
+      - mkdir -p ~/bin
+      - cp {{.APP_NAME}} ~/bin/
+      - echo "✅ Installed {{.APP_NAME}} to ~/bin"
+      - echo "💡 Make sure ~/bin is in your PATH"
+      - echo "💡 Now you can run '{{.APP_NAME}}' from anywhere!"
+
+  run:
+    desc: 🚀 Run pipeline-analyzer with default config
+    deps: [build]
+    cmds:
+      - echo "🚀 Running {{.APP_NAME}}..."
+      - ./{{.APP_NAME}} {{.CLI_ARGS}}
+
+  run-help:
+    desc: 🚀 Show pipeline-analyzer help
+    deps: [build]
+    cmds:
+      - ./{{.APP_NAME}} --help
+
+  run-version:
+    desc: 🚀 Show pipeline-analyzer version
+    deps: [build]
+    cmds:
+      - ./{{.APP_NAME}} --version
+
+  clean:
+    desc: 🧹 Clean up build artifacts
+    cmds:
+      - echo "🧹 Cleaning up..."
+      - rm -f {{.APP_NAME}}
+      - rm -rf dist/
+      - rm -rf .discovery/
+      - rm -rf circleci-analysis/
+      - go clean
+
+  test:
+    desc: 🧪 Run tests
+    cmds:
+      - echo "🧪 Running tests..."
+      - go test -v ./...
+
+  test-coverage:
+    desc: 🧪 Run tests with coverage
+    cmds:
+      - echo "🧪 Running tests with coverage..."
+      - go test -v -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "📊 Coverage report generated coverage.html"
+
+  fmt:
+    desc: 🎯 Format code
+    cmds:
+      - echo "🎯 Formatting code..."
+      - go fmt ./...
+      - goimports -w . 2>/dev/null || true
+
+  lint:
+    desc: 🔍 Lint code
+    cmds:
+      - echo "🔍 Linting code..."
+      - golangci-lint run || echo "💡 Install golangci-lint for better linting"
+
+  vet:
+    desc: 🔍 Vet code
+    cmds:
+      - echo "🔍 Vetting code..."
+      - go vet ./...
+
+  release:
+    desc: 📦 Build release versions for multiple platforms
+    cmds:
+      - echo "📦 Building release versions..."
+      - mkdir -p dist
+      - task: release-build
+        vars:
+          GOOS: darwin
+          GOARCH: amd64
+          SUFFIX: darwin-amd64
+      - task: release-build
+        vars:
+          GOOS: darwin
+          GOARCH: arm64
+          SUFFIX: darwin-arm64
+      - task: release-build
+        vars:
+          GOOS: linux
+          GOARCH: amd64
+          SUFFIX: linux-amd64
+      - task: release-build
+        vars:
+          GOOS: linux
+          GOARCH: arm64
+          SUFFIX: linux-arm64
+      - task: release-build
+        vars:
+          GOOS: windows
+          GOARCH: amd64
+          SUFFIX: windows-amd64
+          EXT: .exe
+      - echo "✅ Release builds completed in dist/"
+      - ls -la dist/
+
+  release-build:
+    internal: true
+    cmds:
+      - GOOS={{.GOOS}} GOARCH={{.GOARCH}} go build -ldflags "-X main.version={{.VERSION}} -X main.buildTime={{.BUILD_TIME}}" -o dist/{{.APP_NAME}}-{{.SUFFIX}}{{.EXT}} ./cmd/{{.APP_NAME}}
+
+  check:
+    desc: 🔎 Run all checks (fmt, vet, lint, test)
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: lint
+      - task: test
+
+  setup:
+    desc: 🛠️ Initial setup for development
+    cmds:
+      - echo "🛠️ Setting up {{.APP_NAME}} development environment..."
+      - task: deps
+      - task: build
+      - echo "✅ Setup complete!"
+      - echo "💡 Run 'task run' to analyze .circleci/config.yml"
+      - echo "💡 Run 'task run-help' to see all options"
+      - echo "💡 Run 'task install-local' to install globally"
+
+  update:
+    desc: 🔄 Update dependencies
+    cmds:
+      - echo "🔄 Updating dependencies..."
+      - go get -u ./...
+      - go mod tidy
+      - echo "✅ Dependencies updated"
+
+  demo:
+    desc: 🎬 Run demo with bash script reference
+    deps: [build]
+    cmds:
+      - echo "🎬 Running demo analysis on bash script..."
+      - echo "📝 Creating sample CircleCI config for demo..."
+      - mkdir -p .demo/.circleci
+      - |
+        cat > .demo/.circleci/config.yml << 'EOF'
+        version: 2.1
+        
+        jobs:
+          build:
+            docker:
+              - image: cimg/go:1.21
+            steps:
+              - checkout
+              - run: go mod download
+              - run: go build -o app ./cmd/pipeline-analyzer
+          
+          test:
+            docker:
+              - image: cimg/go:1.21
+            steps:
+              - checkout
+              - run: go mod download
+              - run: go test ./...
+          
+          lint:
+            docker:
+              - image: golangci/golangci-lint:latest
+            steps:
+              - checkout
+              - run: golangci-lint run
+        
+        workflows:
+          main:
+            jobs:
+              - build
+              - test:
+                  requires: [build]
+              - lint:
+                  requires: [build]
+        EOF
+      - echo "🚀 Running analysis..."
+      - ./{{.APP_NAME}} --output-dir .demo/analysis .demo/.circleci/config.yml
+      - echo "📁 Demo analysis complete! Check .demo/analysis/"
+      - echo "🧹 Cleaning up demo files..."
+      - rm -rf .demo

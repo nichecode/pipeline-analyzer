@@ -1,4 +1,4 @@
-# Pipeline Analyzer - Claude Code Implementation
+# Pipeline Analyzer - RFC
 
 ## Problem Statement
 Replace a fragile bash script that analyzes CircleCI configs with a robust Go utility. The bash script uses `yq` shell commands for YAML parsing and generates interconnected markdown documentation for migration planning.

@@ -5,6 +5,9 @@ vars:
   NODE_VERSION: "18.17.0"
   PYTHON_VERSION: "3.11"
 
+includes:
+  testing: ./tasks/test-tasks.yml
+
 tasks:
   install:
     desc: Install all dependencies (frontend and backend)

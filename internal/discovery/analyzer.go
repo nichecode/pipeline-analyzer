@@ -196,6 +196,9 @@ func (a *Analyzer) analyzeGoTask(configPath, outputDir string) error {
 
 	// Perform analysis
 	analysis := gotask.AnalyzeTaskfile(taskfile)
+	
+	// Post-process includes with the correct base path for better analysis
+	gotask.AnalyzeIncludesWithPath(taskfile, analysis, configPath)
 
 	// Create writer and generate all files
 	writer := gotask.NewWriter(outputDir)

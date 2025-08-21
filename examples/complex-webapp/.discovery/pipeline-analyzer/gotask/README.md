@@ -1,12 +1,12 @@
 # Go-Task Analysis Report
 
-**Generated:** 2025-08-21T10:18:49+01:00
+**Generated:** 2025-08-21T10:47:48+01:00
 **Taskfile:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/Taskfile.yml
 
 ## 📊 Overview
 
 - **Tasks:** 23
-- **Includes:** 0
+- **Includes:** 1
 - **Circular Dependencies:** None ✅
 - **Critical Path Length:** 7 tasks
 - **Tasks with Caching:** 3/23 (13.0%)
@@ -47,6 +47,11 @@ Individual task analysis with commands and optimization opportunities:
 - [tasks/test-frontend.md](tasks/test-frontend.md)
 - [tasks/test-integration.md](tasks/test-integration.md)
 
+### Includes
+Analysis of included Taskfiles:
+
+- [includes/testing.md](includes/testing.md)
+
 ### Analysis Summaries
 
 - [📈 Task Usage & Dependencies](summaries/task-usage.md)
@@ -54,6 +59,7 @@ Individual task analysis with commands and optimization opportunities:
 - [⚡ Command Analysis](summaries/commands.md)
 - [📊 Performance Metrics](summaries/performance.md)
 - [🔍 Variable Analysis](summaries/variables.md)
+- [📁 Include Analysis](summaries/includes.md)
 
 ## 🔍 Key Insights
 
@@ -61,17 +67,17 @@ Individual task analysis with commands and optimization opportunities:
 
 | Task | Used By | Link |
 |------|---------|------|
-| build-docker | 4 tasks | [View](tasks/build-docker.md) |
 | install-backend | 4 tasks | [View](tasks/install-backend.md) |
 | install-frontend | 4 tasks | [View](tasks/install-frontend.md) |
-| test | 2 tasks | [View](tasks/test.md) |
+| build-docker | 4 tasks | [View](tasks/build-docker.md) |
 | start-services | 2 tasks | [View](tasks/start-services.md) |
+| install | 2 tasks | [View](tasks/install.md) |
 
 ### Top Optimization Opportunities
 
-- ⚠️ **build-docker**: Task could benefit from caching optimization
-- ⚠️ **test-integration**: Task could benefit from caching optimization
 - ⚠️ **lint-backend**: Task could benefit from caching optimization
+- ⚠️ **build-docker**: Task could benefit from caching optimization
+- ⚠️ **deploy-prod**: Task could benefit from caching optimization
 
 ### Primary Tool Ecosystem: **Docker**
 

@@ -399,6 +399,18 @@ func GenerateTaskMarkdown(taskAnalysis *TaskAnalysis) string {
 			}
 			sb.WriteString("\n")
 		}
+	} else {
+		// Show explanation for dependency-only tasks
+		if len(taskAnalysis.Dependencies) > 0 {
+			sb.WriteString("## ⚡ Commands\n\n")
+			sb.WriteString("This is a **dependency-only task** that orchestrates other tasks without running direct commands.\n\n")
+			sb.WriteString("**Execution Flow:**\n")
+			sb.WriteString("1. Runs all dependency tasks in the correct order\n")
+			sb.WriteString("2. Completes when all dependencies finish successfully\n\n")
+		} else {
+			sb.WriteString("## ⚡ Commands\n\n")
+			sb.WriteString("⚠️ **No commands defined** - This task may need implementation or could be unused.\n\n")
+		}
 	}
 
 	// Preconditions

@@ -110,6 +110,7 @@ type IncludeAnalysis struct {
 	Namespace    string
 	TaskCount    int
 	Dependencies []string
+	Tasks        map[string]*TaskAnalysis // Individual tasks from the included file
 }
 
 // TaskAnalysis represents detailed analysis of a single task
@@ -131,6 +132,7 @@ type TaskAnalysis struct {
 	Preconditions   []string
 	HasWatch        bool
 	OptimizationOps []string
+	Type            string // Task type (build, test, deploy, etc.)
 }
 
 // DependencyGraph represents the task dependency structure

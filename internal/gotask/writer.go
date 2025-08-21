@@ -197,6 +197,86 @@ func generateIncludeMarkdown(includeName string, includeAnalysis *IncludeAnalysi
 		content += "\n"
 	}
 
+	// Show individual tasks from the included file
+	if len(includeAnalysis.Tasks) > 0 {
+		content += "## 📋 Included Tasks\n\n"
+		
+		// Create a sorted list of task names
+		var taskNames []string
+		for taskName := range includeAnalysis.Tasks {
+			taskNames = append(taskNames, taskName)
+		}
+		sort.Strings(taskNames)
+		
+		content += "| Task | Description | Commands | Type |\n"
+		content += "|------|-------------|----------|------|\n"
+		
+		for _, taskName := range taskNames {
+			taskAnalysis := includeAnalysis.Tasks[taskName]
+			
+			description := taskAnalysis.Description
+			if description == "" {
+				description = "*No description*"
+			}
+			
+			commandCount := len(taskAnalysis.Commands)
+			commandsText := fmt.Sprintf("%d commands", commandCount)
+			if commandCount == 0 {
+				if len(taskAnalysis.Dependencies) > 0 {
+					commandsText = "Dependency-only"
+				} else {
+					commandsText = "No commands"
+				}
+			}
+			
+			content += fmt.Sprintf("| **%s** | %s | %s | %s |\n", 
+				taskName, description, commandsText, taskAnalysis.Type)
+		}
+		content += "\n"
+		
+		// Show detailed commands for each task
+		content += "## ⚡ Task Commands\n\n"
+		
+		for _, taskName := range taskNames {
+			taskAnalysis := includeAnalysis.Tasks[taskName]
+			
+			content += fmt.Sprintf("### %s\n\n", taskName)
+			
+			if taskAnalysis.Description != "" {
+				content += fmt.Sprintf("**Description:** %s\n\n", taskAnalysis.Description)
+			}
+			
+			// Show commands or explain why there are none
+			if len(taskAnalysis.Commands) > 0 {
+				content += "**Commands:**\n\n"
+				for i, command := range taskAnalysis.Commands {
+					content += fmt.Sprintf("%d. ```bash\n%s\n```\n\n", i+1, command)
+				}
+			} else if len(taskAnalysis.Dependencies) > 0 {
+				content += "**Type:** Dependency-only task\n\n"
+				content += "**Dependencies:**\n"
+				for _, dep := range taskAnalysis.Dependencies {
+					content += fmt.Sprintf("- %s\n", dep)
+				}
+				content += "\n"
+			} else {
+				content += "**Status:** ⚠️ No commands or dependencies defined\n\n"
+			}
+			
+			// Show additional task properties if available
+			if len(taskAnalysis.Sources) > 0 {
+				content += "**Sources:** " + fmt.Sprintf("%v", taskAnalysis.Sources) + "\n\n"
+			}
+			if len(taskAnalysis.Generates) > 0 {
+				content += "**Generates:** " + fmt.Sprintf("%v", taskAnalysis.Generates) + "\n\n"
+			}
+		}
+	} else if includeAnalysis.TaskCount > 0 {
+		content += "## ⚠️ Tasks Not Analyzed\n\n"
+		content += fmt.Sprintf("This include contains %d tasks, but they could not be analyzed. ", includeAnalysis.TaskCount)
+		content += "This may happen if the included taskfile is not accessible or has parsing errors.\n\n"
+	}
+
 	content += "## Navigation\n\n"
 	content += "- [← Back to Overview](../README.md)\n"
 	content += "- [Include Summary](../summaries/includes.md)\n"

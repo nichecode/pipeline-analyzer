@@ -39,14 +39,14 @@ The following tasks could benefit from caching optimization:
 
 | Task Type | Total | Optimized | Percentage |
 |-----------|-------|-----------|------------|
+| Test | 6 | 0 | 0.0% |
 | Quality | 3 | 0 | 0.0% |
 | Deploy | 2 | 0 | 0.0% |
 | Cleanup | 1 | 0 | 0.0% |
-| Build | 4 | 2 | 50.0% |
 | Containerization | 3 | 0 | 0.0% |
-| Test | 6 | 0 | 0.0% |
-| Utility | 1 | 0 | 0.0% |
 | Setup | 3 | 1 | 33.3% |
+| Build | 4 | 2 | 50.0% |
+| Utility | 1 | 0 | 0.0% |
 
 ## 🚀 Parallelization Analysis
 

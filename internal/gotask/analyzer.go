@@ -31,7 +31,8 @@ func AnalyzeTaskfile(taskfile *Taskfile) *Analysis {
 	// Analyze variables and environment
 	analyzeVariables(taskfile, analysis)
 	
-	// Analyze includes
+	// Analyze includes  
+	// Note: We don't have access to the original taskfile path here, so include analysis is limited
 	analyzeIncludes(taskfile, analysis)
 	
 	// Build dependency graph and detect cycles
@@ -42,6 +43,75 @@ func AnalyzeTaskfile(taskfile *Taskfile) *Analysis {
 	analysis.OptimizationTips = generateOptimizationTips(taskfile, analysis)
 
 	return analysis
+}
+
+// AnalyzeIncludesWithPath re-analyzes includes with the correct base path
+func AnalyzeIncludesWithPath(taskfile *Taskfile, analysis *Analysis, taskfilePath string) {
+	for name, includeRaw := range taskfile.Includes {
+		includeAnalysis := &IncludeAnalysis{
+			Namespace: name,
+			Tasks:     make(map[string]*TaskAnalysis),
+		}
+		
+		// Handle different include formats (string or object)
+		var includePath string
+		var includeDir string
+		
+		switch include := includeRaw.(type) {
+		case string:
+			includePath = include
+			includeAnalysis.Path = include
+		case map[string]interface{}:
+			if taskfilePath, ok := include["taskfile"].(string); ok {
+				includePath = taskfilePath
+				includeAnalysis.Path = taskfilePath
+			}
+			if dir, ok := include["dir"].(string); ok {
+				includeDir = dir
+			}
+		}
+		
+		// Try to parse included taskfile for deeper analysis
+		if includePath != "" {
+			// Create a mock Include struct for ParseIncludedTaskfile
+			mockInclude := Include{
+				Taskfile: includePath,
+				Dir:      includeDir,
+			}
+			
+			// Parse the included taskfile using the main taskfile path as base
+			includedTaskfile, err := ParseIncludedTaskfile(mockInclude, taskfilePath)
+			if err == nil {
+				// Analyze each task in the included file
+				includeAnalysis.TaskCount = len(includedTaskfile.Tasks)
+				
+				for taskName, task := range includedTaskfile.Tasks {
+					// Create full analysis for each task
+					taskAnalysis := &TaskAnalysis{
+						Name:         taskName,
+						Description:  task.Desc,
+						Summary:      task.Summary,
+						Commands:     ExtractTaskCommands(task),
+						Dependencies: ExtractTaskDependencies(task),
+						Sources:      task.Sources,
+						Generates:    task.Generates,
+						Preconditions: ExtractPreconditions(task),
+						Platforms:    ExtractTaskPlatforms(task),
+						Aliases:      task.Aliases,
+						IsInternal:   task.Internal,
+						HasWatch:     false, // Would need to check for watch mode
+						UsageCount:   0,     // Would need to analyze cross-file dependencies
+						Type:         DetectTaskType(task, taskName),
+					}
+					
+					includeAnalysis.Tasks[taskName] = taskAnalysis
+				}
+			}
+		}
+		
+		// Replace the existing include analysis
+		analysis.IncludeAnalysis[name] = includeAnalysis
+	}
 }
 
 // analyzeTaskDependencies analyzes task dependencies and usage patterns
@@ -134,20 +204,72 @@ func analyzeIncludes(taskfile *Taskfile, analysis *Analysis) {
 	for name, includeRaw := range taskfile.Includes {
 		includeAnalysis := &IncludeAnalysis{
 			Namespace: name,
+			Tasks:     make(map[string]*TaskAnalysis),
 		}
 		
 		// Handle different include formats (string or object)
+		var includePath string
+		var includeDir string
+		
 		switch include := includeRaw.(type) {
 		case string:
+			includePath = include
 			includeAnalysis.Path = include
 		case map[string]interface{}:
-			if taskfile, ok := include["taskfile"].(string); ok {
-				includeAnalysis.Path = taskfile
+			if taskfilePath, ok := include["taskfile"].(string); ok {
+				includePath = taskfilePath
+				includeAnalysis.Path = taskfilePath
+			}
+			if dir, ok := include["dir"].(string); ok {
+				includeDir = dir
 			}
 		}
 		
 		// Try to parse included taskfile for deeper analysis
-		// Note: This would require the actual file to exist
+		if includePath != "" {
+			// Create a mock Include struct for ParseIncludedTaskfile
+			mockInclude := Include{
+				Taskfile: includePath,
+				Dir:      includeDir,
+			}
+			
+			// Get the directory of the main taskfile for relative path resolution
+			// We need to pass the base path where the main Taskfile.yml is located
+			basePath := "."
+			
+			// Parse the included taskfile (this function handles relative paths)
+			includedTaskfile, err := ParseIncludedTaskfile(mockInclude, basePath)
+			if err != nil {
+				// If we can't parse it, just record basic info
+				includeAnalysis.TaskCount = 0
+			} else {
+				// Analyze each task in the included file
+				includeAnalysis.TaskCount = len(includedTaskfile.Tasks)
+				
+				for taskName, task := range includedTaskfile.Tasks {
+					// Create full analysis for each task
+					taskAnalysis := &TaskAnalysis{
+						Name:         taskName,
+						Description:  task.Desc,
+						Summary:      task.Summary,
+						Commands:     ExtractTaskCommands(task),
+						Dependencies: ExtractTaskDependencies(task),
+						Sources:      task.Sources,
+						Generates:    task.Generates,
+						Preconditions: ExtractPreconditions(task),
+						Platforms:    ExtractTaskPlatforms(task),
+						Aliases:      task.Aliases,
+						IsInternal:   task.Internal,
+						HasWatch:     false, // Would need to check for watch mode
+						UsageCount:   0,     // Would need to analyze cross-file dependencies
+						Type:         DetectTaskType(task, taskName),
+					}
+					
+					includeAnalysis.Tasks[taskName] = taskAnalysis
+				}
+			}
+		}
+		
 		analysis.IncludeAnalysis[name] = includeAnalysis
 	}
 }
@@ -326,6 +448,7 @@ func AnalyzeTask(taskfile *Taskfile, taskName string, analysis *Analysis) *TaskA
 		Aliases:         task.Aliases,
 		Preconditions:   ExtractPreconditions(task),
 		HasWatch:        task.Watch,
+		Type:            DetectTaskType(task, taskName),
 	}
 
 	// Count pattern usage in this task

@@ -16,6 +16,14 @@ This task depends on:
 - [test-backend](test-backend.md)
 - [test-integration](test-integration.md)
 
+## ⚡ Commands
+
+This is a **dependency-only task** that orchestrates other tasks without running direct commands.
+
+**Execution Flow:**
+1. Runs all dependency tasks in the correct order
+2. Completes when all dependencies finish successfully
+
 ## 🚀 Optimization Opportunities
 
 - Consider adding sources and generates for caching

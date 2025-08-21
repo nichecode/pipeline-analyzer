@@ -114,26 +114,43 @@ func GenerateJobMarkdown(name string, job Job, outputDir string) error
 func GenerateWorkflowMarkdown(name string, workflow Workflow, outputDir string) error
 func GenerateMainReadme(analysis *Analysis, outputDir string) error
 func GenerateMigrationChecklist(analysis *Analysis, outputDir string) error
+func GenerateDiscoveryOverview(outputDir string) error          // .discovery/README.md
+func GenerateToolOverview(analysis *Analysis, outputDir string) error // pipeline-analyzer/README.md
 ```
 
-## Required Output Files (matching bash script exactly)
+## Required Output Files (in-repository discovery structure)
 
 ### Directory Structure
 ```
-circleci-analysis/
-├── README.md                     # Main overview
-├── MIGRATION-CHECKLIST.md        # Migration guide
-├── jobs/                         # Individual job files
-│   ├── {job-name}.md
-├── workflows/                    # Individual workflow files
-│   ├── {workflow-name}.md
-└── summaries/                    # Analysis summaries
-    ├── all-jobs.md
-    ├── job-usage.md
-    ├── commands.md
-    ├── docker-and-scripts.md
-    ├── executors-and-images.md
-    └── workflows.md
+.discovery/
+├── README.md                     # Overview of all analysis
+└── pipeline-analyzer/           # Tool output
+    ├── README.md                 # Tool summary and usage
+    └── circleci/                 # CircleCI analysis
+        ├── README.md             # CircleCI overview
+        ├── MIGRATION-CHECKLIST.md # Migration guide
+        ├── jobs/                 # Individual job files
+        │   ├── {job-name}.md
+        ├── workflows/            # Individual workflow files
+        │   ├── {workflow-name}.md
+        └── summaries/            # Analysis summaries
+            ├── all-jobs.md
+            ├── job-usage.md
+            ├── commands.md
+            ├── docker-and-scripts.md
+            ├── executors-and-images.md
+            └── workflows.md
+```
+
+### Future Platform Support
+```
+.discovery/pipeline-analyzer/
+├── github/                       # Future GitHub Actions analysis
+│   └── README.md
+└── gotask/                       # go-task analysis and generation
+    ├── README.md
+    ├── current/                  # Analysis of existing tasks
+    └── generated/                # Generated task files
 ```
 
 ## Key Functionality to Replicate
@@ -171,13 +188,21 @@ circleci-analysis/
 
 ## CLI Interface
 ```bash
-# Basic usage
+# Basic usage (in repository root)
 ./analyze [path-to-config.yml]
 
 # Default to .circleci/config.yml if no path provided
-# Output to ./circleci-analysis/ directory
+# Output to ./.discovery/pipeline-analyzer/circleci/ directory
+# Create .discovery structure if it doesn't exist
 # Print progress and summary stats
 ```
+
+## Output Directory Logic
+- Check if running in a repository root (presence of .git directory)
+- If in repo: create `.discovery/pipeline-analyzer/circleci/` structure
+- If not in repo: fall back to `circleci-analysis/` directory
+- Create `.discovery/README.md` with overview of all analysis tools
+- Create `.discovery/pipeline-analyzer/README.md` with tool summary
 
 ## Error Handling
 - Check if config file exists
@@ -223,12 +248,14 @@ Implement Go equivalents of the bash grep patterns:
 - npm/yarn/pnpm commands
 
 ## Success Criteria
-The Go tool should produce identical markdown output to the bash script, with:
-- Same file structure and naming
-- Same content and analysis
-- Same navigation links
+The Go tool should produce equivalent markdown output to the bash script, but organized in the new discovery structure:
+- Create proper `.discovery/pipeline-analyzer/circleci/` structure
+- Generate overview files for discovery and tool levels
+- Same content and analysis quality as bash script
+- Same navigation links (adjusted for new paths)
 - Equivalent statistics and tables
 - Better error handling and performance
+- Future-ready structure for GitHub Actions and go-task analysis
 
 ## Test Data
 Include a sample CircleCI config in testdata/ to validate the implementation works correctly.

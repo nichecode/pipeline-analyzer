@@ -1,7 +1,7 @@
 # Pipeline Analysis Discovery Report
 
 **Repository:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp  
-**Generated:** 2025-08-21T11:32:40+01:00  
+**Generated:** 2025-08-21T11:42:35+01:00  
 **Git Repository:** false
 
 ## 🔍 Discovered Build Tools

@@ -30,6 +30,16 @@ Total tasks found: **23**
 
 ## Task Categories
 
+### Cleanup (1 tasks)
+
+- [clean](../tasks/clean.md)
+
+### Quality (3 tasks)
+
+- [lint](../tasks/lint.md)
+- [lint-backend](../tasks/lint-backend.md)
+- [lint-frontend](../tasks/lint-frontend.md)
+
 ### Containerization (3 tasks)
 
 - [dev](../tasks/dev.md)
@@ -45,11 +55,9 @@ Total tasks found: **23**
 - [test-frontend](../tasks/test-frontend.md)
 - [test-integration](../tasks/test-integration.md)
 
-### Quality (3 tasks)
+### Utility (1 tasks)
 
-- [lint](../tasks/lint.md)
-- [lint-backend](../tasks/lint-backend.md)
-- [lint-frontend](../tasks/lint-frontend.md)
+- [security-scan](../tasks/security-scan.md)
 
 ### Setup (3 tasks)
 
@@ -63,14 +71,6 @@ Total tasks found: **23**
 - [build-backend](../tasks/build-backend.md)
 - [build-docker](../tasks/build-docker.md)
 - [build-frontend](../tasks/build-frontend.md)
-
-### Utility (1 tasks)
-
-- [security-scan](../tasks/security-scan.md)
-
-### Cleanup (1 tasks)
-
-- [clean](../tasks/clean.md)
 
 ### Deploy (2 tasks)
 

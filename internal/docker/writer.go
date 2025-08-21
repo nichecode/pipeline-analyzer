@@ -47,20 +47,26 @@ func (w *Writer) WriteAllFiles(analysis *DockerAnalysis, configPath string) erro
 		}
 	}
 
-	// Write docker-compose analysis if present
-	if analysis.DockerCompose != nil {
-		if err := w.writeDockerComposeAnalysis(analysis.DockerCompose, filepath.Join(w.outputDir, "docker-compose.md")); err != nil {
-			return fmt.Errorf("failed to write docker-compose analysis: %w", err)
+	// Write docker-compose analysis files
+	for i, compose := range analysis.DockerCompose {
+		var filename string
+		if len(analysis.DockerCompose) == 1 {
+			filename = "docker-compose.md"
+		} else {
+			filename = fmt.Sprintf("docker-compose-%d.md", i+1)
+		}
+		if err := w.writeDockerComposeAnalysis(compose, filepath.Join(w.outputDir, filename)); err != nil {
+			return fmt.Errorf("failed to write docker-compose analysis %s: %w", filename, err)
 		}
 	}
 
 	// Write security analysis
-	if err := w.writeSecurityAnalysis(analysis, filepath.Join(w.outputDir, "security-analysis.md")); err != nil {
+	if err := w.writeSecurityAnalysis(analysis, filepath.Join(w.outputDir, "security-analysis.md"), configPath); err != nil {
 		return fmt.Errorf("failed to write security analysis: %w", err)
 	}
 
 	// Write optimization guide
-	if err := w.writeOptimizationGuide(analysis, filepath.Join(w.outputDir, "optimization-guide.md")); err != nil {
+	if err := w.writeOptimizationGuide(analysis, filepath.Join(w.outputDir, "optimization-guide.md"), configPath); err != nil {
 		return fmt.Errorf("failed to write optimization guide: %w", err)
 	}
 
@@ -125,9 +131,33 @@ func (w *Writer) writeMainReadme(analysis *DockerAnalysis, configPath string) er
 	}
 
 	// Docker Compose
-	if analysis.DockerCompose != nil {
+	if len(analysis.DockerCompose) > 0 {
 		content += "### 🔧 Docker Compose\n\n"
-		content += fmt.Sprintf("- [docker-compose configuration](docker-compose.md) - %d services\n\n", analysis.DockerCompose.ServiceCount)
+		if len(analysis.DockerCompose) == 1 {
+			// Single compose file
+			compose := analysis.DockerCompose[0]
+			displayPath := compose.FilePath
+			if configPath != "" {
+				if rel, err := filepath.Rel(configPath, compose.FilePath); err == nil {
+					displayPath = rel
+				}
+			}
+			content += fmt.Sprintf("- [%s](docker-compose.md) - %d services\n\n", displayPath, compose.ServiceCount)
+		} else {
+			// Multiple compose files
+			totalServices := 0
+			for i, compose := range analysis.DockerCompose {
+				displayPath := compose.FilePath
+				if configPath != "" {
+					if rel, err := filepath.Rel(configPath, compose.FilePath); err == nil {
+						displayPath = rel
+					}
+				}
+				content += fmt.Sprintf("- [%s](docker-compose-%d.md) - %d services\n", displayPath, i+1, compose.ServiceCount)
+				totalServices += compose.ServiceCount
+			}
+			content += fmt.Sprintf("\n**Total: %d compose files, %d services**\n\n", len(analysis.DockerCompose), totalServices)
+		}
 	}
 
 	// Analysis sections
@@ -516,7 +546,7 @@ func (w *Writer) writeDockerComposeAnalysis(compose *DockerComposeAnalysis, outp
 }
 
 // writeSecurityAnalysis writes the security analysis report
-func (w *Writer) writeSecurityAnalysis(analysis *DockerAnalysis, outputPath string) error {
+func (w *Writer) writeSecurityAnalysis(analysis *DockerAnalysis, outputPath string, configPath string) error {
 	content := `# Docker Security Analysis
 
 ## 🔒 Security Overview
@@ -572,24 +602,37 @@ This report analyzes security issues and provides recommendations for your Docke
 		}
 	}
 
-	// Docker Compose security
-	if analysis.DockerCompose != nil && analysis.DockerCompose.Analysis != nil {
-		if len(analysis.DockerCompose.Analysis.SecurityIssues) > 0 {
-			content += "## 🔧 Docker Compose Security Issues\n\n"
-			for _, issue := range analysis.DockerCompose.Analysis.SecurityIssues {
+	// Docker Compose security (all compose files)
+	composeSecurityIssues := 0
+	for _, compose := range analysis.DockerCompose {
+		if compose.Analysis != nil && len(compose.Analysis.SecurityIssues) > 0 {
+			if composeSecurityIssues == 0 {
+				content += "## 🔧 Docker Compose Security Issues\n\n"
+			}
+			if len(analysis.DockerCompose) > 1 {
+				displayPath := filepath.Base(compose.FilePath)
+				content += fmt.Sprintf("### %s\n\n", displayPath)
+			}
+			for _, issue := range compose.Analysis.SecurityIssues {
 				content += fmt.Sprintf("- ⚠️ %s\n", issue)
 			}
 			content += "\n"
-			totalIssues += len(analysis.DockerCompose.Analysis.SecurityIssues)
+			composeSecurityIssues += len(compose.Analysis.SecurityIssues)
 		}
 	}
+	totalIssues += composeSecurityIssues
 
 	// Summary
 	content += fmt.Sprintf("## 📊 Security Summary\n\n")
 	content += fmt.Sprintf("- **Total security issues:** %d\n", totalIssues)
 	content += fmt.Sprintf("- **Dockerfiles analyzed:** %d\n", len(analysis.Dockerfiles))
-	if analysis.DockerCompose != nil {
-		content += fmt.Sprintf("- **Services analyzed:** %d\n", analysis.DockerCompose.ServiceCount)
+	if len(analysis.DockerCompose) > 0 {
+		totalServices := 0
+		for _, compose := range analysis.DockerCompose {
+			totalServices += compose.ServiceCount
+		}
+		content += fmt.Sprintf("- **Compose files analyzed:** %d\n", len(analysis.DockerCompose))
+		content += fmt.Sprintf("- **Services analyzed:** %d\n", totalServices)
 	}
 	content += "\n"
 
@@ -644,7 +687,7 @@ This report analyzes security issues and provides recommendations for your Docke
 }
 
 // writeOptimizationGuide writes the optimization guide
-func (w *Writer) writeOptimizationGuide(analysis *DockerAnalysis, outputPath string) error {
+func (w *Writer) writeOptimizationGuide(analysis *DockerAnalysis, outputPath string, configPath string) error {
 	content := `# Docker Optimization Guide
 
 ## ⚡ Performance Optimization
@@ -685,14 +728,22 @@ This guide provides recommendations to optimize your Docker setup for better per
 		}
 	}
 
-	// Docker Compose optimizations
-	if analysis.DockerCompose != nil && analysis.DockerCompose.Analysis != nil {
-		if len(analysis.DockerCompose.Analysis.PerformanceIssues) > 0 {
-			content += "## 🔧 Docker Compose Optimizations\n\n"
-			for _, issue := range analysis.DockerCompose.Analysis.PerformanceIssues {
+	// Docker Compose optimizations (all compose files)
+	composeOptimizations := 0
+	for _, compose := range analysis.DockerCompose {
+		if compose.Analysis != nil && len(compose.Analysis.PerformanceIssues) > 0 {
+			if composeOptimizations == 0 {
+				content += "## 🔧 Docker Compose Optimizations\n\n"
+			}
+			if len(analysis.DockerCompose) > 1 {
+				displayPath := filepath.Base(compose.FilePath)
+				content += fmt.Sprintf("### %s\n\n", displayPath)
+			}
+			for _, issue := range compose.Analysis.PerformanceIssues {
 				content += fmt.Sprintf("- %s\n", issue)
 			}
 			content += "\n"
+			composeOptimizations += len(compose.Analysis.PerformanceIssues)
 		}
 	}
 

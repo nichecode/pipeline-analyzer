@@ -138,7 +138,7 @@ type DockerUsageAnalysis struct {
 // DockerAnalysis aggregates all Docker-related analysis
 type DockerAnalysis struct {
 	Dockerfiles     []*DockerfileAnalysis      `json:"dockerfiles"`
-	DockerCompose   *DockerComposeAnalysis     `json:"docker_compose"`
+	DockerCompose   []*DockerComposeAnalysis   `json:"docker_compose"`
 	Usage           *DockerUsageAnalysis       `json:"usage"`
 	Summary         *DockerSummary             `json:"summary"`
 	GeneratedAt     time.Time                  `json:"generated_at"`
@@ -151,6 +151,7 @@ type DockerSummary struct {
 	SecurityIssues         int      `json:"security_issues"`
 	OptimizationIssues     int      `json:"optimization_issues"`
 	HasDockerCompose       bool     `json:"has_docker_compose"`
+	TotalComposeFiles      int      `json:"total_compose_files"`
 	ServiceCount           int      `json:"service_count"`
 	UniqueBaseImages       []string `json:"unique_base_images"`
 	MostCommonInstructions []string `json:"most_common_instructions"`

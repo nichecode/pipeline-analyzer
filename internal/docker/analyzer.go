@@ -18,6 +18,7 @@ func AnalyzeDocker(rootPath string) (*DockerAnalysis, error) {
 
 	analysis := &DockerAnalysis{
 		Dockerfiles:   []*DockerfileAnalysis{},
+		DockerCompose: []*DockerComposeAnalysis{},
 		Summary:       &DockerSummary{},
 		GeneratedAt:   time.Now(),
 	}
@@ -33,15 +34,14 @@ func AnalyzeDocker(rootPath string) (*DockerAnalysis, error) {
 		analysis.Dockerfiles = append(analysis.Dockerfiles, dockerfileAnalysis)
 	}
 
-	// Analyze docker-compose files
-	if len(composeFiles) > 0 {
-		// Use the first compose file found (most common case)
-		composeAnalysis, err := ParseDockerCompose(composeFiles[0])
+	// Analyze all docker-compose files
+	for _, composeFile := range composeFiles {
+		composeAnalysis, err := ParseDockerCompose(composeFile)
 		if err != nil {
-			fmt.Printf("Warning: Failed to parse docker-compose %s: %v\n", composeFiles[0], err)
-		} else {
-			analysis.DockerCompose = composeAnalysis
+			fmt.Printf("Warning: Failed to parse docker-compose %s: %v\n", composeFile, err)
+			continue
 		}
+		analysis.DockerCompose = append(analysis.DockerCompose, composeAnalysis)
 	}
 
 	// Analyze Docker usage across other tools
@@ -57,15 +57,19 @@ func AnalyzeDocker(rootPath string) (*DockerAnalysis, error) {
 func generateDockerSummary(analysis *DockerAnalysis) *DockerSummary {
 	summary := &DockerSummary{
 		TotalDockerfiles:       len(analysis.Dockerfiles),
-		HasDockerCompose:       analysis.DockerCompose != nil,
+		HasDockerCompose:       len(analysis.DockerCompose) > 0,
+		TotalComposeFiles:      len(analysis.DockerCompose),
 		UniqueBaseImages:       []string{},
 		MostCommonInstructions: []string{},
 		Recommendations:        []string{},
 	}
 
-	if analysis.DockerCompose != nil {
-		summary.ServiceCount = analysis.DockerCompose.ServiceCount
+	// Sum up services from all compose files
+	totalServices := 0
+	for _, compose := range analysis.DockerCompose {
+		totalServices += compose.ServiceCount
 	}
+	summary.ServiceCount = totalServices
 
 	// Count multi-stage builds and collect base images
 	baseImageMap := make(map[string]int)

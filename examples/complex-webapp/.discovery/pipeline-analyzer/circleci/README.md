@@ -1,12 +1,12 @@
 # CircleCI Analysis Report
 
-**Generated:** 2025-08-21T11:32:40+01:00
+**Generated:** 2025-08-21T11:42:35+01:00
 **Config:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/.circleci/config.yml
 
 ## 📊 Overview
 
 - **Unique jobs:** 13
-- **Workflows:** weekly-security, build-test-deploy, nightly-full-test
+- **Workflows:** nightly-full-test, weekly-security, build-test-deploy
 
 ## 🚀 Quick Start
 
@@ -63,10 +63,10 @@ Workflow structure and job dependencies:
 | security-scan | 3 | [View Details](jobs/security-scan.md) |
 | test-e2e | 2 | [View Details](jobs/test-e2e.md) |
 | test-performance | 2 | [View Details](jobs/test-performance.md) |
+| test-backend | 1 | [View Details](jobs/test-backend.md) |
 | build-docker-images | 1 | [View Details](jobs/build-docker-images.md) |
-| lint-backend | 1 | [View Details](jobs/lint-backend.md) |
 | build-frontend | 1 | [View Details](jobs/build-frontend.md) |
-| lint-frontend | 1 | [View Details](jobs/lint-frontend.md) |
-| deploy-staging | 1 | [View Details](jobs/deploy-staging.md) |
+| test-frontend | 1 | [View Details](jobs/test-frontend.md) |
 | hold-for-approval | 1 | [View Details](jobs/hold-for-approval.md) |
 | deploy-production | 1 | [View Details](jobs/deploy-production.md) |
+| lint-frontend | 1 | [View Details](jobs/lint-frontend.md) |

@@ -1,7 +1,7 @@
 # Workflow: CI/CD Pipeline
 
 **File:** ci.yml  
-**Generated:** 2025-08-21T11:32:40+01:00
+**Generated:** 2025-08-21T11:42:35+01:00
 
 ## 📊 Overview
 
@@ -20,13 +20,34 @@
 
 | Job | Runner | Steps | Commands | Actions |
 |-----|--------|-------|----------|---------|
+| [test-backend](../jobs/test-backend.md) | ubuntu-latest | 4 | 4 | 2 |
 | [build-and-deploy](../jobs/build-and-deploy.md) | ubuntu-latest | 6 | 8 | 2 |
 | [test-frontend](../jobs/test-frontend.md) | ubuntu-latest | 6 | 3 | 3 |
-| [test-backend](../jobs/test-backend.md) | ubuntu-latest | 4 | 4 | 2 |
 
 ## ⚡ Command Patterns Detected
 
 These command patterns are good candidates for go-task consolidation:
+
+### docker (3 commands)
+
+- `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
+- `docker build -t webapp-backend:${{ github.sha }} -f docker/backend/Dockerfile .`
+- `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \`
+
+### pip (2 commands)
+
+- `pip install -r api/requirements.txt`
+- `pip install -r api/requirements-dev.txt`
+
+### shell (3 commands)
+
+- `cd api`
+- `aquasec/trivy image webapp-frontend:${{ github.sha }}`
+- `echo "Deploying to staging..."`
+
+### python (1 commands)
+
+- `python -m pytest tests/ --cov=. --cov-report=xml`
 
 ### npm (6 commands)
 
@@ -36,27 +57,6 @@ These command patterns are good candidates for go-task consolidation:
 - `npm ci`
 - `npm run lint`
 - `npm run test:coverage`
-
-### docker (3 commands)
-
-- `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
-- `docker build -t webapp-backend:${{ github.sha }} -f docker/backend/Dockerfile .`
-- `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \`
-
-### shell (3 commands)
-
-- `aquasec/trivy image webapp-frontend:${{ github.sha }}`
-- `echo "Deploying to staging..."`
-- `cd api`
-
-### pip (2 commands)
-
-- `pip install -r api/requirements.txt`
-- `pip install -r api/requirements-dev.txt`
-
-### python (1 commands)
-
-- `python -m pytest tests/ --cov=. --cov-report=xml`
 
 
 ## 🔍 Navigation

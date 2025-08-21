@@ -312,8 +312,13 @@ func (a *Analyzer) analyzeDocker(configPath, outputDir string) error {
 	fmt.Printf("✅ Docker analysis completed successfully\n")
 	fmt.Printf("   - Dockerfiles: %d\n", len(analysis.Dockerfiles))
 	fmt.Printf("   - Multi-stage builds: %d\n", analysis.Summary.MultiStageBuilds)
-	if analysis.DockerCompose != nil {
-		fmt.Printf("   - Docker Compose services: %d\n", analysis.DockerCompose.ServiceCount)
+	if len(analysis.DockerCompose) > 0 {
+		totalServices := 0
+		for _, compose := range analysis.DockerCompose {
+			totalServices += compose.ServiceCount
+		}
+		fmt.Printf("   - Docker Compose files: %d\n", len(analysis.DockerCompose))
+		fmt.Printf("   - Docker Compose services: %d\n", totalServices)
 	}
 	fmt.Printf("   - Security issues: %d\n", analysis.Summary.SecurityIssues)
 	fmt.Printf("   - Overall score: %d/100\n", analysis.Summary.OverallScore)

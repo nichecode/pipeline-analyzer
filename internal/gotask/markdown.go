@@ -42,7 +42,7 @@ func GenerateMainReadme(analysis *Analysis, taskfilePath string) string {
 
 	// Quick Start section
 	sb.WriteString("## 🚀 Quick Start\n\n")
-	sb.WriteString("1. **[📋 Optimization Guide](OPTIMIZATION-GUIDE.md)** - Performance improvement recommendations\n")
+	sb.WriteString("1. **[📋 Optimization Guide](optimization-guide.md)** - Performance improvement recommendations\n")
 	sb.WriteString("2. **[📈 Task Usage Analysis](summaries/task-usage.md)** - Task dependency patterns\n")
 	sb.WriteString("3. **[⚡ Command Analysis](summaries/commands.md)** - Command patterns and tools\n")
 	sb.WriteString("4. **[🔗 Dependency Graph](tasks/dependency-graph.md)** - Visual task relationships\n\n")
@@ -144,7 +144,7 @@ func GenerateMainReadme(analysis *Analysis, taskfilePath string) string {
 
 	// Next steps
 	sb.WriteString("## 🎯 Next Steps\n\n")
-	sb.WriteString("1. **Review [Optimization Guide](OPTIMIZATION-GUIDE.md)** for specific improvements\n")
+	sb.WriteString("1. **Review [Optimization Guide](optimization-guide.md)** for specific improvements\n")
 	sb.WriteString("2. **Check [Performance Metrics](summaries/performance.md)** for caching opportunities\n")
 	sb.WriteString("3. **Examine [Dependency Graph](tasks/dependency-graph.md)** for parallelization potential\n")
 	if len(analysis.CircularDeps) > 0 {
@@ -570,7 +570,7 @@ func GenerateDependencyGraph(analysis *Analysis) string {
 	sb.WriteString("## Navigation\n\n")
 	sb.WriteString("- [← Back to Overview](../README.md)\n")
 	sb.WriteString("- [Task Usage Analysis](../summaries/task-usage.md)\n")
-	sb.WriteString("- [Optimization Guide](../OPTIMIZATION-GUIDE.md)\n")
+	sb.WriteString("- [Optimization Guide](../optimization-guide.md)\n")
 
 	return sb.String()
 }

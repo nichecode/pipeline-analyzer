@@ -69,7 +69,7 @@ func (w *Writer) WriteAllFiles(analysis *Analysis, taskfilePath string) error {
 	return nil
 }
 
-// writeMainFiles writes README.md and OPTIMIZATION-GUIDE.md
+// writeMainFiles writes README.md and optimization-guide.md
 func (w *Writer) writeMainFiles(analysis *Analysis, taskfilePath string) error {
 	// Write README.md
 	readme := GenerateMainReadme(analysis, taskfilePath)
@@ -77,10 +77,10 @@ func (w *Writer) writeMainFiles(analysis *Analysis, taskfilePath string) error {
 		return fmt.Errorf("failed to write README.md: %w", err)
 	}
 
-	// Write OPTIMIZATION-GUIDE.md
+	// Write optimization-guide.md
 	guide := GenerateOptimizationGuide(analysis)
-	if err := w.writeFile("OPTIMIZATION-GUIDE.md", guide); err != nil {
-		return fmt.Errorf("failed to write OPTIMIZATION-GUIDE.md: %w", err)
+	if err := w.writeFile("optimization-guide.md", guide); err != nil {
+		return fmt.Errorf("failed to write optimization-guide.md: %w", err)
 	}
 
 	return nil
@@ -244,7 +244,7 @@ func PrintSummary(analysis *Analysis, outputDir string) {
 	fmt.Printf("📖 **Start here:** %s/README.md\n\n", outputDir)
 
 	fmt.Printf("🔗 **Key entry points:**\n")
-	fmt.Printf("   - 📋 Optimization guide: %s/OPTIMIZATION-GUIDE.md\n", outputDir)
+	fmt.Printf("   - 📋 Optimization guide: %s/optimization-guide.md\n", outputDir)
 	fmt.Printf("   - 📈 Task analysis: %s/summaries/task-usage.md\n", outputDir)
 	fmt.Printf("   - ⚡ Performance metrics: %s/summaries/performance.md\n", outputDir)
 	fmt.Printf("   - 🔗 Dependency graph: %s/tasks/dependency-graph.md\n\n", outputDir)

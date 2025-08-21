@@ -1,17 +1,18 @@
 # Pipeline Analysis Discovery Report
 
 **Repository:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp  
-**Generated:** 2025-08-21T07:59:05+01:00  
+**Generated:** 2025-08-21T08:39:03+01:00  
 **Git Repository:** false
 
 ## 🔍 Discovered Build Tools
 
-Found **3** build tools in this repository:
+Found **4** build tools in this repository:
 
 | Tool | Type | Status | Analysis |
 |------|------|--------|----------|
 | CircleCI | circleci | ✅ Success | [View Analysis](circleci/README.md) |
 | Go Task | gotask | ✅ Success | [View Analysis](gotask/README.md) |
+| GitHub Actions | github-actions | ✅ Success | [View Analysis](github-actions/README.md) |
 | npm | npm | ✅ Success | [View Analysis](npm/README.md) |
 
 
@@ -21,6 +22,7 @@ Each discovered tool has its own analysis directory:
 
 - [circleci/](circleci/) - CircleCI analysis
 - [gotask/](gotask/) - Go Task analysis
+- [github-actions/](github-actions/) - GitHub Actions analysis
 - [npm/](npm/) - npm analysis
 
 

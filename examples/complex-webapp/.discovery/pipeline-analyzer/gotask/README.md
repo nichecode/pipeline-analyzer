@@ -1,6 +1,6 @@
 # Go-Task Analysis Report
 
-**Generated:** 2025-08-21T07:59:05+01:00
+**Generated:** 2025-08-21T08:39:03+01:00
 **Taskfile:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/Taskfile.yml
 
 ## 📊 Overview
@@ -13,7 +13,7 @@
 
 ## 🚀 Quick Start
 
-1. **[📋 Optimization Guide](OPTIMIZATION-GUIDE.md)** - Performance improvement recommendations
+1. **[📋 Optimization Guide](optimization-guide.md)** - Performance improvement recommendations
 2. **[📈 Task Usage Analysis](summaries/task-usage.md)** - Task dependency patterns
 3. **[⚡ Command Analysis](summaries/commands.md)** - Command patterns and tools
 4. **[🔗 Dependency Graph](tasks/dependency-graph.md)** - Visual task relationships
@@ -64,20 +64,20 @@ Individual task analysis with commands and optimization opportunities:
 | build-docker | 4 tasks | [View](tasks/build-docker.md) |
 | install-frontend | 4 tasks | [View](tasks/install-frontend.md) |
 | install-backend | 4 tasks | [View](tasks/install-backend.md) |
-| install | 2 tasks | [View](tasks/install.md) |
-| test | 2 tasks | [View](tasks/test.md) |
+| start-services | 2 tasks | [View](tasks/start-services.md) |
+| build | 2 tasks | [View](tasks/build.md) |
 
 ### Top Optimization Opportunities
 
-- ⚠️ **test-integration**: Task could benefit from caching optimization
+- ⚠️ **deploy-prod**: Task could benefit from caching optimization
+- ⚠️ **dev**: Task could benefit from caching optimization
 - ⚠️ **test-e2e**: Task could benefit from caching optimization
-- ⚠️ **build-docker**: Task could benefit from caching optimization
 
 ### Primary Tool Ecosystem: **Docker**
 
 ## 🎯 Next Steps
 
-1. **Review [Optimization Guide](OPTIMIZATION-GUIDE.md)** for specific improvements
+1. **Review [Optimization Guide](optimization-guide.md)** for specific improvements
 2. **Check [Performance Metrics](summaries/performance.md)** for caching opportunities
 3. **Examine [Dependency Graph](tasks/dependency-graph.md)** for parallelization potential
 

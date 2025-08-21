@@ -39,14 +39,14 @@ The following tasks could benefit from caching optimization:
 
 | Task Type | Total | Optimized | Percentage |
 |-----------|-------|-----------|------------|
+| Cleanup | 1 | 0 | 0.0% |
+| Build | 4 | 2 | 50.0% |
 | Deploy | 2 | 0 | 0.0% |
-| Containerization | 3 | 0 | 0.0% |
-| Quality | 3 | 0 | 0.0% |
-| Utility | 1 | 0 | 0.0% |
 | Setup | 3 | 1 | 33.3% |
 | Test | 6 | 0 | 0.0% |
-| Build | 4 | 2 | 50.0% |
-| Cleanup | 1 | 0 | 0.0% |
+| Quality | 3 | 0 | 0.0% |
+| Containerization | 3 | 0 | 0.0% |
+| Utility | 1 | 0 | 0.0% |
 
 ## 🚀 Parallelization Analysis
 
@@ -70,5 +70,5 @@ Tasks that can run in parallel (by dependency level):
 ## Navigation
 
 - [← Back to Overview](../README.md)
-- [Optimization Guide](../OPTIMIZATION-GUIDE.md)
+- [Optimization Guide](../optimization-guide.md)
 - [Dependency Graph](../tasks/dependency-graph.md)

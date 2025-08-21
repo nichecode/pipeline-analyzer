@@ -29,7 +29,7 @@ func GenerateMainReadme(analysis *Analysis, configPath string) string {
 
 	// Quick Start section
 	sb.WriteString("## 🚀 Quick Start\n\n")
-	sb.WriteString("1. **[📋 Migration Checklist](MIGRATION-CHECKLIST.md)** - Your step-by-step guide\n")
+	sb.WriteString("1. **[📋 Migration Checklist](migration-checklist.md)** - Your step-by-step guide\n")
 	sb.WriteString("2. **[📈 Job Usage Analysis](summaries/job-usage.md)** - Job reuse patterns and dependencies\n")
 	sb.WriteString("3. **[⚡ Commands Analysis](summaries/commands.md)** - All run commands for conversion\n\n")
 
@@ -71,7 +71,7 @@ func GenerateMainReadme(analysis *Analysis, configPath string) string {
 
 	// Next Steps section
 	sb.WriteString("## 🎯 Next Steps\n\n")
-	sb.WriteString("1. **Start with [Migration Checklist](MIGRATION-CHECKLIST.md)**\n")
+	sb.WriteString("1. **Start with [Migration Checklist](migration-checklist.md)**\n")
 	sb.WriteString("2. **Review most frequently used jobs** from [job usage analysis](summaries/job-usage.md)\n")
 	sb.WriteString("3. **Examine job dependencies** to understand execution order\n")
 	sb.WriteString("4. **Begin converting** highest-impact jobs to go-task format\n\n")

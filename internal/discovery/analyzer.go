@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nichecode/pipeline-analyzer/internal/circleci"
+	"github.com/nichecode/pipeline-analyzer/internal/githubactions"
 	"github.com/nichecode/pipeline-analyzer/internal/gotask"
 )
 
@@ -86,6 +87,14 @@ func (a *Analyzer) analyzeTool(tool BuildTool) AnalysisResult {
 
 	case "gotask":
 		err := a.analyzeGoTask(configPath, outputDir)
+		if err != nil {
+			result.Error = err.Error()
+		} else {
+			result.Success = true
+		}
+
+	case "github-actions":
+		err := a.analyzeGitHubActions(configPath, outputDir)
 		if err != nil {
 			result.Error = err.Error()
 		} else {
@@ -174,6 +183,74 @@ func (a *Analyzer) analyzeGoTask(configPath, outputDir string) error {
 	// Create writer and generate all files
 	writer := gotask.NewWriter(outputDir)
 	if err := writer.WriteAllFiles(analysis, configPath); err != nil {
+		return fmt.Errorf("failed to write analysis files: %w", err)
+	}
+
+	return nil
+}
+
+// analyzeGitHubActions runs GitHub Actions workflow analysis
+func (a *Analyzer) analyzeGitHubActions(configPath, outputDir string) error {
+	// For GitHub Actions, configPath might be a directory path (.github/workflows/)
+	// We need to handle both single file and directory scanning
+	
+	analyzer := githubactions.NewAnalyzer()
+	
+	// Check if configPath is a directory or file
+	stat, err := os.Stat(configPath)
+	if err != nil {
+		return fmt.Errorf("failed to stat config path: %w", err)
+	}
+
+	var workflowFiles []string
+	if stat.IsDir() {
+		// Scan directory for workflow files
+		files, err := filepath.Glob(filepath.Join(configPath, "*.yml"))
+		if err != nil {
+			return fmt.Errorf("failed to find yml files: %w", err)
+		}
+		yamlFiles, err := filepath.Glob(filepath.Join(configPath, "*.yaml"))
+		if err != nil {
+			return fmt.Errorf("failed to find yaml files: %w", err)
+		}
+		workflowFiles = append(files, yamlFiles...)
+	} else {
+		// Single file
+		workflowFiles = []string{configPath}
+	}
+
+	if len(workflowFiles) == 0 {
+		return fmt.Errorf("no workflow files found")
+	}
+
+	fmt.Printf("✅ Found %d workflow file(s)\n", len(workflowFiles))
+
+	// Create output directory
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
+	}
+
+	// Analyze each workflow file
+	var allResults []*githubactions.AnalysisResult
+	for _, workflowFile := range workflowFiles {
+		result, err := analyzer.AnalyzeWorkflow(workflowFile)
+		if err != nil {
+			fmt.Printf("⚠️  Failed to analyze %s: %v\n", filepath.Base(workflowFile), err)
+			continue
+		}
+		allResults = append(allResults, result)
+		
+		fmt.Printf("   - %s: %d jobs, %d steps\n", 
+			filepath.Base(workflowFile), len(result.Jobs), result.TotalSteps)
+	}
+
+	if len(allResults) == 0 {
+		return fmt.Errorf("failed to analyze any workflow files")
+	}
+
+	// Generate markdown documentation for all workflows
+	writer := githubactions.NewWriter(outputDir)
+	if err := writer.WriteAllFiles(allResults, configPath); err != nil {
 		return fmt.Errorf("failed to write analysis files: %w", err)
 	}
 

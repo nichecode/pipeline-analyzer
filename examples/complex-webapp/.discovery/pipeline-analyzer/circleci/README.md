@@ -1,6 +1,6 @@
 # CircleCI Analysis Report
 
-**Generated:** 2025-08-21T07:59:05+01:00
+**Generated:** 2025-08-21T08:39:03+01:00
 **Config:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/.circleci/config.yml
 
 ## 📊 Overview
@@ -10,7 +10,7 @@
 
 ## 🚀 Quick Start
 
-1. **[📋 Migration Checklist](MIGRATION-CHECKLIST.md)** - Your step-by-step guide
+1. **[📋 Migration Checklist](migration-checklist.md)** - Your step-by-step guide
 2. **[📈 Job Usage Analysis](summaries/job-usage.md)** - Job reuse patterns and dependencies
 3. **[⚡ Commands Analysis](summaries/commands.md)** - All run commands for conversion
 
@@ -51,7 +51,7 @@ Workflow structure and job dependencies:
 
 ## 🎯 Next Steps
 
-1. **Start with [Migration Checklist](MIGRATION-CHECKLIST.md)**
+1. **Start with [Migration Checklist](migration-checklist.md)**
 2. **Review most frequently used jobs** from [job usage analysis](summaries/job-usage.md)
 3. **Examine job dependencies** to understand execution order
 4. **Begin converting** highest-impact jobs to go-task format
@@ -61,12 +61,12 @@ Workflow structure and job dependencies:
 | Job | Usage Count | Link |
 |-----|-------------|------|
 | security-scan | 3 | [View Details](jobs/security-scan.md) |
-| test-performance | 2 | [View Details](jobs/test-performance.md) |
 | test-e2e | 2 | [View Details](jobs/test-e2e.md) |
-| test-backend | 1 | [View Details](jobs/test-backend.md) |
+| test-performance | 2 | [View Details](jobs/test-performance.md) |
 | test-integration | 1 | [View Details](jobs/test-integration.md) |
-| build-backend | 1 | [View Details](jobs/build-backend.md) |
 | lint-frontend | 1 | [View Details](jobs/lint-frontend.md) |
-| build-frontend | 1 | [View Details](jobs/build-frontend.md) |
+| test-frontend | 1 | [View Details](jobs/test-frontend.md) |
+| deploy-production | 1 | [View Details](jobs/deploy-production.md) |
+| hold-for-approval | 1 | [View Details](jobs/hold-for-approval.md) |
+| build-backend | 1 | [View Details](jobs/build-backend.md) |
 | build-docker-images | 1 | [View Details](jobs/build-docker-images.md) |
-| deploy-staging | 1 | [View Details](jobs/deploy-staging.md) |

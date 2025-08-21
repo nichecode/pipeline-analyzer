@@ -465,7 +465,7 @@ func GeneratePerformanceAnalysis(analysis *Analysis) string {
 
 	sb.WriteString("## Navigation\n\n")
 	sb.WriteString("- [← Back to Overview](../README.md)\n")
-	sb.WriteString("- [Optimization Guide](../OPTIMIZATION-GUIDE.md)\n")
+	sb.WriteString("- [Optimization Guide](../optimization-guide.md)\n")
 	sb.WriteString("- [Dependency Graph](../tasks/dependency-graph.md)\n")
 
 	return sb.String()

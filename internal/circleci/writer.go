@@ -65,7 +65,7 @@ func (w *Writer) WriteAllFiles(analysis *Analysis, configPath string) error {
 	return nil
 }
 
-// writeMainFiles writes README.md and MIGRATION-CHECKLIST.md
+// writeMainFiles writes README.md and migration-checklist.md
 func (w *Writer) writeMainFiles(analysis *Analysis, configPath string) error {
 	// Write README.md
 	readme := GenerateMainReadme(analysis, configPath)
@@ -73,10 +73,10 @@ func (w *Writer) writeMainFiles(analysis *Analysis, configPath string) error {
 		return fmt.Errorf("failed to write README.md: %w", err)
 	}
 
-	// Write MIGRATION-CHECKLIST.md
+	// Write migration-checklist.md
 	checklist := GenerateMigrationChecklist(analysis)
-	if err := w.writeFile("MIGRATION-CHECKLIST.md", checklist); err != nil {
-		return fmt.Errorf("failed to write MIGRATION-CHECKLIST.md: %w", err)
+	if err := w.writeFile("migration-checklist.md", checklist); err != nil {
+		return fmt.Errorf("failed to write migration-checklist.md: %w", err)
 	}
 
 	return nil
@@ -197,7 +197,7 @@ func PrintSummary(analysis *Analysis, outputDir string) {
 	fmt.Printf("📖 **Start here:** %s/README.md\n\n", outputDir)
 
 	fmt.Printf("🔗 **Key entry points:**\n")
-	fmt.Printf("   - 📋 Migration guide: %s/MIGRATION-CHECKLIST.md\n", outputDir)
+	fmt.Printf("   - 📋 Migration guide: %s/migration-checklist.md\n", outputDir)
 	fmt.Printf("   - 📈 Job analysis: %s/summaries/job-usage.md\n", outputDir)
 	fmt.Printf("   - 📝 All jobs: %s/summaries/all-jobs.md\n\n", outputDir)
 

@@ -149,6 +149,7 @@ func analyzeCommandPatterns(taskfile *Taskfile, analysis *Analysis) {
 		"gradle":        regexp.MustCompile(`\bgradle\s+`),
 		"cargo":         regexp.MustCompile(`\bcargo\s+`),
 		"rustc":         regexp.MustCompile(`\brustc\s+`),
+		"task":          regexp.MustCompile(`\btask\s+`),
 		"./":            regexp.MustCompile(`\./[^\s]+`),
 		"ssh":           regexp.MustCompile(`\bssh\s+`),
 		"scp":           regexp.MustCompile(`\bscp\s+`),

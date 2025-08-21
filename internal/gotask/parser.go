@@ -165,8 +165,13 @@ func extractCommand(cmdInterface interface{}) string {
 	case string:
 		return cmd
 	case map[string]interface{}:
+		// Handle regular command syntax: cmd: "some command"
 		if command, ok := cmd["cmd"].(string); ok {
 			return command
+		}
+		// Handle task call syntax: task: "task-name"
+		if taskName, ok := cmd["task"].(string); ok {
+			return "task " + taskName
 		}
 	}
 	return ""

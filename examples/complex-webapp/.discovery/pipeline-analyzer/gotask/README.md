@@ -1,6 +1,6 @@
 # Go-Task Analysis Report
 
-**Generated:** 2025-08-22T11:33:58+01:00
+**Generated:** 2025-08-22T11:41:24+01:00
 **Taskfile:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/Taskfile.yml
 
 ## 📊 Overview
@@ -19,20 +19,11 @@ flowchart TD
 Install frontend dependencies
 • npm install
 `"]
-    STOP_SERVICES["`**stop-services**
-Stop all services
-• docker-compose down
-`"]
     TEST["`**test**
 Run all tests
 `"]
     BUILD["`**build**
 Build all components
-`"]
-    INSTALL_BACKEND["`**install-backend**
-Install backend dependencies
-• pip install -r api/requirements.txt
-• pip install -r api/requirements-dev.txt
 `"]
     CLEAN["`**clean**
 Clean all build artifacts
@@ -48,6 +39,15 @@ Start development environment
 • cd api && python manage.py runserver &
 • ... (2 more)
 `"]
+    STOP_SERVICES["`**stop-services**
+Stop all services
+• docker-compose down
+`"]
+    INSTALL_BACKEND["`**install-backend**
+Install backend dependencies
+• pip install -r api/requirements.txt
+• pip install -r api/requirements-dev.txt
+`"]
 
     classDef workflow fill:#e1f5fe,stroke:#01579b,stroke-width:3px
     classDef setup fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
@@ -56,12 +56,12 @@ Start development environment
     classDef deploy fill:#e0f2f1,stroke:#004d40,stroke-width:2px
     classDef utility fill:#f1f8e9,stroke:#33691e,stroke-width:2px
     class INSTALL_FRONTEND setup
-    class STOP_SERVICES utility
     class TEST test
     class BUILD build
-    class INSTALL_BACKEND setup
     class CLEAN setup
     class DEV utility
+    class STOP_SERVICES utility
+    class INSTALL_BACKEND setup
 ```
 
 ## 🚀 Quick Start
@@ -120,17 +120,17 @@ Analysis of included Taskfiles:
 
 | Task | Used By | Link |
 |------|---------|------|
-| install-backend | 4 tasks | [View](tasks/install-backend.md) |
 | install-frontend | 4 tasks | [View](tasks/install-frontend.md) |
 | build-docker | 4 tasks | [View](tasks/build-docker.md) |
-| test | 2 tasks | [View](tasks/test.md) |
+| install-backend | 4 tasks | [View](tasks/install-backend.md) |
 | build | 2 tasks | [View](tasks/build.md) |
+| install | 2 tasks | [View](tasks/install.md) |
 
 ### Top Optimization Opportunities
 
-- ⚠️ **security-scan**: Task could benefit from caching optimization
-- ⚠️ **build-docker**: Task could benefit from caching optimization
-- ⚠️ **performance-test**: Task could benefit from caching optimization
+- ⚠️ **test-e2e**: Task could benefit from caching optimization
+- ⚠️ **deploy-staging**: Task could benefit from caching optimization
+- ⚠️ **test-integration**: Task could benefit from caching optimization
 
 ### Primary Tool Ecosystem: **Docker**
 

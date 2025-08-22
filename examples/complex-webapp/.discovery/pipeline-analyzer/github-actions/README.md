@@ -1,6 +1,6 @@
 # GitHub Actions Analysis Report
 
-**Generated:** 2025-08-22T11:33:58+01:00
+**Generated:** 2025-08-22T11:41:24+01:00
 **Config Path:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/.github/workflows
 
 ## 📊 Overview
@@ -76,9 +76,9 @@ Individual job analysis with go-task conversion opportunities:
 
 ## 🎯 Build Refactoring Recommendations
 
+- 💡 Consider creating go-task equivalents for repeated command patterns
 - 📦 Multiple npm commands detected - consider consolidating into go-task
 - 🐳 Docker commands found - go-task could simplify container management
-- 💡 Consider creating go-task equivalents for repeated command patterns
 
 ## 🔧 Most Used Actions
 

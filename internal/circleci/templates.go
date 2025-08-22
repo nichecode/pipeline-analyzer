@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/nichecode/pipeline-analyzer/internal/shared"
 )
 
 // GenerateMainReadme generates the main README.md file
@@ -27,6 +29,14 @@ func GenerateMainReadme(analysis *Analysis, configPath string) string {
 		sb.WriteString("- **Workflows:** None found\n")
 	}
 	sb.WriteString("\n")
+
+	// Workflow diagram
+	diagram := generateCircleCIDiagram(analysis)
+	if diagram != "" {
+		sb.WriteString("## 📊 Workflow Overview\n\n")
+		sb.WriteString(diagram)
+		sb.WriteString("\n")
+	}
 
 	// Quick Start section
 	sb.WriteString("## 🚀 Quick Start\n\n")
@@ -441,4 +451,139 @@ func GenerateCommandMarkdown(cmdAnalysis *CommandAnalysis) string {
 	sb.WriteString("- [← Back to Overview](../README.md)\n")
 
 	return sb.String()
+}
+
+// generateCircleCIDiagram creates a simple Mermaid diagram for CircleCI workflows
+func generateCircleCIDiagram(analysis *Analysis) string {
+	if analysis.TotalJobs == 0 {
+		return ""
+	}
+	
+	diagram := &shared.MermaidDiagram{
+		Title: "CircleCI Pipeline",
+	}
+	
+	// Get main jobs (limit to most important ones)
+	jobNames := GetAllJobNames(analysis.Config)
+	mostUsed := GetMostUsedJobs(analysis)
+	
+	// Prioritize frequently used jobs, fall back to all jobs
+	var selectedJobs []string
+	if len(mostUsed) > 0 {
+		for _, jobInfo := range mostUsed {
+			selectedJobs = append(selectedJobs, jobInfo.Name)
+			if len(selectedJobs) >= 8 { // Limit for readability
+				break
+			}
+		}
+	} else {
+		// Use first 8 jobs if no usage data
+		for i, jobName := range jobNames {
+			if i >= 8 {
+				break
+			}
+			selectedJobs = append(selectedJobs, jobName)
+		}
+	}
+	
+	// Create nodes for selected jobs
+	for _, jobName := range selectedJobs {
+		if job, exists := analysis.Config.Jobs[jobName]; exists {
+			commands := ExtractCommands(job.Steps)
+			if len(commands) > 5 {
+				commands = commands[:5]
+			}
+			
+			var executor string
+			if job.Docker != nil && len(job.Docker) > 0 {
+				executor = fmt.Sprintf("Docker: %s", job.Docker[0].Image)
+			} else if job.Machine != nil {
+				executor = "Machine executor"
+			} else if job.Executor != "" {
+				executor = fmt.Sprintf("Executor: %s", job.Executor)
+			}
+			
+			node := shared.MermaidNode{
+				ID:          shared.CleanNodeID(jobName),
+				Label:       jobName,
+				Description: executor,
+				Commands:    commands,
+				NodeType:    shared.ClassifyNodeType(jobName, commands),
+			}
+			diagram.Nodes = append(diagram.Nodes, node)
+		}
+	}
+	
+	// Add workflow dependencies if available
+	if analysis.TotalWorkflows > 0 {
+		for _, workflow := range analysis.Config.Workflows {
+			for _, jobInterface := range workflow.Jobs {
+				// Handle different job formats in workflows
+				var jobName string
+				var requires []string
+				
+				switch job := jobInterface.(type) {
+				case string:
+					jobName = job
+				case map[string]interface{}:
+					// Extract job name (first key)
+					for name := range job {
+						jobName = name
+						if reqsInterface, hasReqs := job[name].(map[string]interface{}); hasReqs {
+							if reqsArray, hasRequires := reqsInterface["requires"]; hasRequires {
+								if reqsSlice, ok := reqsArray.([]interface{}); ok {
+									for _, req := range reqsSlice {
+										if reqStr, ok := req.(string); ok {
+											requires = append(requires, reqStr)
+										}
+									}
+								}
+							}
+						}
+						break
+					}
+				}
+				
+				if jobName != "" {
+					// Find target job node
+					var toNode *shared.MermaidNode
+					for i := range diagram.Nodes {
+						if diagram.Nodes[i].Label == jobName {
+							toNode = &diagram.Nodes[i]
+							break
+						}
+					}
+					
+					// Add dependency edges
+					if toNode != nil && len(requires) > 0 {
+						for _, reqJob := range requires {
+							for i := range diagram.Nodes {
+								if diagram.Nodes[i].Label == reqJob {
+									edge := shared.MermaidEdge{
+										From: diagram.Nodes[i].ID,
+										To:   toNode.ID,
+									}
+									diagram.Edges = append(diagram.Edges, edge)
+									break
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	// If no workflow dependencies, create a simple sequential flow
+	if len(diagram.Edges) == 0 && len(diagram.Nodes) > 1 {
+		for i := 0; i < len(diagram.Nodes)-1; i++ {
+			edge := shared.MermaidEdge{
+				From: diagram.Nodes[i].ID,
+				To:   diagram.Nodes[i+1].ID,
+			}
+			diagram.Edges = append(diagram.Edges, edge)
+		}
+	}
+	
+	return diagram.Generate()
 }

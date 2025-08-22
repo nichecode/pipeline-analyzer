@@ -6,10 +6,10 @@
 |---------|-------------|-------------|-----------|
 | npm | 11 | 9 | package-management |
 | docker-compose | 6 | 5 | containerization |
-| python | 3 | 3 | runtime |
 | docker | 3 | 2 | containerization |
-| kubectl | 2 | 2 | deployment |
+| python | 3 | 3 | runtime |
 | pip | 2 | 1 | package-management |
+| kubectl | 2 | 2 | deployment |
 
 ## Most Common Commands
 
@@ -18,11 +18,11 @@
 | `npm` | 11 | Shell command |
 | `docker-compose` | 6 | Docker Compose orchestration commands |
 | `cd` | 6 | Shell command |
-| `docker` | 3 | Shell command |
 | `rm` | 3 | Shell command |
+| `docker` | 3 | Shell command |
 | `trivy` | 2 | Shell command |
-| `echo` | 2 | Shell command |
 | `kubectl` | 2 | Shell command |
+| `echo` | 2 | Shell command |
 | `pip` | 2 | Shell command |
 | `if` | 1 | Shell command |
 | `npx` | 1 | Shell command |
@@ -33,6 +33,19 @@
 **Primary ecosystem detected:** Docker
 
 ## Tasks by Pattern
+
+### Runtime
+
+**python** (3 tasks):
+- [build-backend](../tasks/build-backend.md)
+- [dev](../tasks/dev.md)
+- [test-backend](../tasks/test-backend.md)
+
+### Deployment
+
+**kubectl** (2 tasks):
+- [deploy-prod](../tasks/deploy-prod.md)
+- [deploy-staging](../tasks/deploy-staging.md)
 
 ### Package-Management
 
@@ -62,19 +75,6 @@
 **docker** (2 tasks):
 - [build-docker](../tasks/build-docker.md)
 - [clean](../tasks/clean.md)
-
-### Runtime
-
-**python** (3 tasks):
-- [build-backend](../tasks/build-backend.md)
-- [dev](../tasks/dev.md)
-- [test-backend](../tasks/test-backend.md)
-
-### Deployment
-
-**kubectl** (2 tasks):
-- [deploy-prod](../tasks/deploy-prod.md)
-- [deploy-staging](../tasks/deploy-staging.md)
 
 ## Navigation
 

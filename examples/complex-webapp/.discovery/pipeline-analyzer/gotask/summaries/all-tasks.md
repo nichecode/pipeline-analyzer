@@ -30,36 +30,6 @@ Total tasks found: **23**
 
 ## Task Categories
 
-### Cleanup (1 tasks)
-
-- [clean](../tasks/clean.md)
-
-### Setup (3 tasks)
-
-- [install](../tasks/install.md)
-- [install-backend](../tasks/install-backend.md)
-- [install-frontend](../tasks/install-frontend.md)
-
-### Test (6 tasks)
-
-- [performance-test](../tasks/performance-test.md)
-- [test](../tasks/test.md)
-- [test-backend](../tasks/test-backend.md)
-- [test-e2e](../tasks/test-e2e.md)
-- [test-frontend](../tasks/test-frontend.md)
-- [test-integration](../tasks/test-integration.md)
-
-### Deploy (2 tasks)
-
-- [deploy-prod](../tasks/deploy-prod.md)
-- [deploy-staging](../tasks/deploy-staging.md)
-
-### Containerization (3 tasks)
-
-- [dev](../tasks/dev.md)
-- [start-services](../tasks/start-services.md)
-- [stop-services](../tasks/stop-services.md)
-
 ### Quality (3 tasks)
 
 - [lint](../tasks/lint.md)
@@ -73,9 +43,39 @@ Total tasks found: **23**
 - [build-docker](../tasks/build-docker.md)
 - [build-frontend](../tasks/build-frontend.md)
 
+### Deploy (2 tasks)
+
+- [deploy-prod](../tasks/deploy-prod.md)
+- [deploy-staging](../tasks/deploy-staging.md)
+
+### Cleanup (1 tasks)
+
+- [clean](../tasks/clean.md)
+
+### Containerization (3 tasks)
+
+- [dev](../tasks/dev.md)
+- [start-services](../tasks/start-services.md)
+- [stop-services](../tasks/stop-services.md)
+
 ### Utility (1 tasks)
 
 - [security-scan](../tasks/security-scan.md)
+
+### Test (6 tasks)
+
+- [performance-test](../tasks/performance-test.md)
+- [test](../tasks/test.md)
+- [test-backend](../tasks/test-backend.md)
+- [test-e2e](../tasks/test-e2e.md)
+- [test-frontend](../tasks/test-frontend.md)
+- [test-integration](../tasks/test-integration.md)
+
+### Setup (3 tasks)
+
+- [install](../tasks/install.md)
+- [install-backend](../tasks/install-backend.md)
+- [install-frontend](../tasks/install-frontend.md)
 
 ## Navigation
 

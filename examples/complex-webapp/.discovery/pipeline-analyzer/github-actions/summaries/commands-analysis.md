@@ -2,6 +2,14 @@
 
 ## ⚡ Command Patterns Suitable for go-task
 
+### npm (6 commands)
+
+- `npm run lint`
+- `npm run test:coverage`
+- `npm run build:prod`
+- `npm audit --audit-level=moderate`
+- `npm ci`
+
 ### pip (2 commands)
 
 - `pip install -r api/requirements.txt`
@@ -19,17 +27,9 @@
 
 ### docker (3 commands)
 
+- `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
 - `docker build -t webapp-backend:${{ github.sha }} -f docker/backend/Dockerfile .`
 - `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \`
-- `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
-
-### npm (6 commands)
-
-- `npm ci`
-- `npm run lint`
-- `npm run test:coverage`
-- `npm run build:prod`
-- `npm audit --audit-level=moderate`
 
 
 ## 🔍 Navigation

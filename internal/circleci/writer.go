@@ -22,6 +22,7 @@ func (w *Writer) CreateDirectories() error {
 	dirs := []string{
 		w.outputDir,
 		filepath.Join(w.outputDir, "jobs"),
+		filepath.Join(w.outputDir, "commands"),
 		filepath.Join(w.outputDir, "workflows"),
 		filepath.Join(w.outputDir, "summaries"),
 	}
@@ -49,6 +50,11 @@ func (w *Writer) WriteAllFiles(analysis *Analysis, configPath string) error {
 
 	// Write job files
 	if err := w.writeJobFiles(analysis); err != nil {
+		return err
+	}
+
+	// Write command files
+	if err := w.writeCommandFiles(analysis); err != nil {
 		return err
 	}
 
@@ -98,6 +104,21 @@ func (w *Writer) writeJobFiles(analysis *Analysis) error {
 
 		if err := w.writeFile(filename, content); err != nil {
 			return fmt.Errorf("failed to write job file %s: %w", filename, err)
+		}
+	}
+
+	return nil
+}
+
+// writeCommandFiles generates individual command analysis files
+func (w *Writer) writeCommandFiles(analysis *Analysis) error {
+	for cmdName, cmdAnalysis := range analysis.ReusableCommands {
+		content := GenerateCommandMarkdown(cmdAnalysis)
+		normalizedName := NormalizeJobName(cmdName)
+		filename := fmt.Sprintf("commands/%s.md", normalizedName)
+
+		if err := w.writeFile(filename, content); err != nil {
+			return fmt.Errorf("failed to write command file %s: %w", filename, err)
 		}
 	}
 

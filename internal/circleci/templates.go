@@ -18,6 +18,7 @@ func GenerateMainReadme(analysis *Analysis, configPath string) string {
 	// Overview section
 	sb.WriteString("## 📊 Overview\n\n")
 	sb.WriteString(fmt.Sprintf("- **Unique jobs:** %d\n", analysis.TotalJobs))
+	sb.WriteString(fmt.Sprintf("- **Reusable commands:** %d\n", analysis.TotalCommands))
 
 	if analysis.TotalWorkflows > 0 {
 		workflowNames := GetAllWorkflowNames(analysis.Config)
@@ -45,6 +46,18 @@ func GenerateMainReadme(analysis *Analysis, configPath string) string {
 		sb.WriteString(fmt.Sprintf("- [jobs/%s.md](jobs/%s.md)\n", normalizedName, normalizedName))
 	}
 	sb.WriteString("\n")
+
+	if analysis.TotalCommands > 0 {
+		sb.WriteString("### Reusable Commands\n")
+		sb.WriteString("Reusable command definitions with analysis and usage patterns:\n\n")
+		commandNames := GetAllCommandNames(analysis.Config)
+		sort.Strings(commandNames)
+		for _, commandName := range commandNames {
+			normalizedName := NormalizeJobName(commandName)
+			sb.WriteString(fmt.Sprintf("- [commands/%s.md](commands/%s.md)\n", normalizedName, normalizedName))
+		}
+		sb.WriteString("\n")
+	}
 
 	sb.WriteString("### Workflows\n")
 	sb.WriteString("Workflow structure and job dependencies:\n\n")
@@ -346,6 +359,85 @@ func GenerateWorkflowMarkdown(workflowAnalysis *WorkflowAnalysis) string {
 	// Navigation
 	sb.WriteString("## Navigation\n\n")
 	sb.WriteString("- [← Back to Workflows](../summaries/workflows.md)\n")
+	sb.WriteString("- [← Back to Overview](../README.md)\n")
+
+	return sb.String()
+}
+
+// GenerateCommandMarkdown generates markdown for a reusable command
+func GenerateCommandMarkdown(cmdAnalysis *CommandAnalysis) string {
+	var sb strings.Builder
+
+	sb.WriteString(fmt.Sprintf("# Reusable Command: %s\n\n", cmdAnalysis.Name))
+
+	// Description
+	if cmdAnalysis.Description != "" {
+		sb.WriteString(fmt.Sprintf("**Description:** %s\n\n", cmdAnalysis.Description))
+	}
+
+	// Usage
+	sb.WriteString("## 📊 Usage Statistics\n\n")
+	sb.WriteString(fmt.Sprintf("- **Used by:** %d job(s)\n", cmdAnalysis.UsageCount))
+	
+	if len(cmdAnalysis.Parameters) > 0 {
+		sb.WriteString(fmt.Sprintf("- **Parameters:** %d\n", len(cmdAnalysis.Parameters)))
+	}
+	sb.WriteString("\n")
+
+	// Parameters
+	if len(cmdAnalysis.Parameters) > 0 {
+		sb.WriteString("## ⚙️ Parameters\n\n")
+		sb.WriteString("| Parameter | Type | Description |\n")
+		sb.WriteString("|-----------|------|-------------|\n")
+		
+		for paramName, paramDef := range cmdAnalysis.Parameters {
+			paramType := "string"
+			description := "No description"
+			
+			if paramMap, ok := paramDef.(map[string]interface{}); ok {
+				if t, exists := paramMap["type"]; exists {
+					paramType = fmt.Sprintf("%v", t)
+				}
+				if d, exists := paramMap["description"]; exists {
+					description = fmt.Sprintf("%v", d)
+				}
+			}
+			
+			sb.WriteString(fmt.Sprintf("| %s | %s | %s |\n", paramName, paramType, description))
+		}
+		sb.WriteString("\n")
+	}
+
+	// Commands/Steps
+	if len(cmdAnalysis.Commands) > 0 {
+		sb.WriteString("## ⚡ Steps\n\n")
+		for i, command := range cmdAnalysis.Commands {
+			if len(cmdAnalysis.Commands) > 1 {
+				sb.WriteString(fmt.Sprintf("**Step %d:**\n", i+1))
+			}
+			sb.WriteString("```bash\n")
+			sb.WriteString(command)
+			sb.WriteString("\n```\n\n")
+		}
+	} else {
+		sb.WriteString("## ⚡ Steps\n\n")
+		sb.WriteString("This command uses non-run steps (e.g., cache operations, setup steps).\n\n")
+	}
+
+	// Command patterns
+	if len(cmdAnalysis.Patterns) > 0 {
+		sb.WriteString("## 🔍 Tool Usage\n\n")
+		for pattern, count := range cmdAnalysis.Patterns {
+			if count > 0 {
+				sb.WriteString(fmt.Sprintf("- **%s:** %d occurrence(s)\n", pattern, count))
+			}
+		}
+		sb.WriteString("\n")
+	}
+
+	// Navigation
+	sb.WriteString("## Navigation\n\n")
+	sb.WriteString("- [← Back to Commands](../summaries/commands.md)\n")
 	sb.WriteString("- [← Back to Overview](../README.md)\n")
 
 	return sb.String()

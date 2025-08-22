@@ -85,8 +85,11 @@ type Analysis struct {
 	JobDependencies  map[string][]string
 	CommandPatterns  map[string]PatternCount
 	ExecutorUsage    map[string][]string
+	CommandUsage     map[string]int
+	ReusableCommands map[string]*CommandAnalysis
 	TotalJobs        int
 	TotalWorkflows   int
+	TotalCommands    int
 	GeneratedAt      time.Time
 }
 
@@ -106,6 +109,16 @@ type JobAnalysis struct {
 	Dependencies []string
 	UsageCount   int
 	Patterns     map[string]int
+}
+
+// CommandAnalysis represents analysis for a reusable command
+type CommandAnalysis struct {
+	Name        string
+	Description string
+	Commands    []string
+	UsageCount  int
+	Parameters  map[string]interface{}
+	Patterns    map[string]int
 }
 
 // WorkflowAnalysis represents analysis for a single workflow

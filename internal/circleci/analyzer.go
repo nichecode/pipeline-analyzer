@@ -10,15 +10,21 @@ import (
 // AnalyzeConfig performs comprehensive analysis of CircleCI configuration
 func AnalyzeConfig(config *Config) *Analysis {
 	analysis := &Analysis{
-		Config:          config,
-		JobUsage:        make(map[string]int),
-		JobDependencies: make(map[string][]string),
-		CommandPatterns: make(map[string]PatternCount),
-		ExecutorUsage:   make(map[string][]string),
-		TotalJobs:       len(config.Jobs),
-		TotalWorkflows:  len(config.Workflows),
-		GeneratedAt:     time.Now(),
+		Config:           config,
+		JobUsage:         make(map[string]int),
+		JobDependencies:  make(map[string][]string),
+		CommandPatterns:  make(map[string]PatternCount),
+		ExecutorUsage:    make(map[string][]string),
+		CommandUsage:     make(map[string]int),
+		ReusableCommands: make(map[string]*CommandAnalysis),
+		TotalJobs:        len(config.Jobs),
+		TotalWorkflows:   len(config.Workflows),
+		TotalCommands:    len(config.Commands),
+		GeneratedAt:      time.Now(),
 	}
+
+	// Analyze reusable commands
+	analyzeReusableCommands(config, analysis)
 
 	// Analyze job usage in workflows
 	analyzeJobUsage(config, analysis)
@@ -314,4 +320,76 @@ func GetJobsByPattern(analysis *Analysis, pattern string) []string {
 		return patternCount.Jobs
 	}
 	return nil
+}
+
+// GetAllCommandNames returns all reusable command names from the config
+func GetAllCommandNames(config *Config) []string {
+	commandNames := make([]string, 0, len(config.Commands))
+	for name := range config.Commands {
+		commandNames = append(commandNames, name)
+	}
+	return commandNames
+}
+
+// analyzeReusableCommands analyzes reusable command definitions
+func analyzeReusableCommands(config *Config, analysis *Analysis) {
+	for cmdName, command := range config.Commands {
+		// Extract commands from command steps
+		commands := ExtractCommands(command.Steps)
+		
+		// Create command analysis
+		cmdAnalysis := &CommandAnalysis{
+			Name:        cmdName,
+			Description: command.Description,
+			Commands:    commands,
+			UsageCount:  0, // Will be updated when counting usage
+			Parameters:  make(map[string]interface{}),
+			Patterns:    make(map[string]int),
+		}
+		
+		// Parse parameters if they exist
+		if command.Parameters != nil {
+			if params, ok := command.Parameters.(map[string]interface{}); ok {
+				cmdAnalysis.Parameters = params
+			}
+		}
+		
+		// Count command patterns in this reusable command
+		patterns := map[string]*regexp.Regexp{
+			"docker":    regexp.MustCompile(`\bdocker\s+`),
+			"npm":       regexp.MustCompile(`\bnpm\s+`),
+			"yarn":      regexp.MustCompile(`\byarn\s+`),
+			"git":       regexp.MustCompile(`\bgit\s+`),
+			"curl":      regexp.MustCompile(`\bcurl\s+`),
+			"aws":       regexp.MustCompile(`\baws\s+`),
+			"kubectl":   regexp.MustCompile(`\bkubectl\s+`),
+			"helm":      regexp.MustCompile(`\bhelm\s+`),
+			"python":    regexp.MustCompile(`\bpython\s+`),
+			"pip":       regexp.MustCompile(`\bpip\s+`),
+		}
+		
+		for patternName, pattern := range patterns {
+			for _, command := range commands {
+				if pattern.MatchString(command) {
+					cmdAnalysis.Patterns[patternName]++
+				}
+			}
+		}
+		
+		analysis.ReusableCommands[cmdName] = cmdAnalysis
+	}
+	
+	// Count reusable command usage in jobs
+	for _, job := range config.Jobs {
+		for _, stepInterface := range job.Steps {
+			if stepMap, ok := stepInterface.(map[string]interface{}); ok {
+				for stepKey := range stepMap {
+					if _, exists := config.Commands[stepKey]; exists {
+						analysis.CommandUsage[stepKey]++
+						analysis.ReusableCommands[stepKey].UsageCount++
+					}
+				}
+			}
+		}
+	}
 }

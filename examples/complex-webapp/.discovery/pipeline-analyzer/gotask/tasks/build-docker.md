@@ -16,8 +16,7 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 docker build -t complex-webapp-frontend:latest -f docker/frontend/Dockerfile .
 ```
@@ -30,8 +29,7 @@ docker build -t complex-webapp-frontend:latest -f docker/frontend/Dockerfile .
 **Suggestions:**
 - Avoid using 'latest' tag, specify explicit version
 
-### Command 2
-
+**Command 2:**
 ```bash
 docker build -t complex-webapp-backend:latest -f docker/backend/Dockerfile .
 ```

@@ -18,8 +18,6 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
 ```bash
 kubectl apply -f k8s/production/ --context=production-cluster
 ```

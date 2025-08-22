@@ -28,8 +28,6 @@ Independent jobs (run first):
 ├── security-scan
 
 Dependent jobs:
-├── build-backend
-│   └── requires: test-backend
 ├── build-docker-images
 │   └── requires: build-frontend
 │   └── requires: build-backend
@@ -39,13 +37,6 @@ Dependent jobs:
 ├── deploy-staging
 │   └── requires: build-docker-images
 │   └── requires: test-integration
-├── hold-for-approval
-│   └── requires: build-docker-images
-│   └── requires: test-performance
-├── test-backend
-│   └── requires: lint-backend
-├── build-frontend
-│   └── requires: test-frontend
 ├── deploy-production
 │   └── requires: hold-for-approval
 ├── test-frontend
@@ -53,8 +44,17 @@ Dependent jobs:
 ├── test-integration
 │   └── requires: test-frontend
 │   └── requires: test-backend
+├── build-frontend
+│   └── requires: test-frontend
+├── hold-for-approval
+│   └── requires: build-docker-images
+│   └── requires: test-performance
+├── test-backend
+│   └── requires: lint-backend
 ├── test-e2e
 │   └── requires: test-integration
+├── build-backend
+│   └── requires: test-backend
 ```
 
 ## Navigation

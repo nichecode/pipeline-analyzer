@@ -7,18 +7,18 @@
 | 1 | install-backend | 4 tasks | [install-backend](../tasks/install-backend.md) |
 | 2 | build-docker | 4 tasks | [build-docker](../tasks/build-docker.md) |
 | 3 | install-frontend | 4 tasks | [install-frontend](../tasks/install-frontend.md) |
-| 4 | test | 2 tasks | [test](../tasks/test.md) |
-| 5 | build | 2 tasks | [build](../tasks/build.md) |
-| 6 | start-services | 2 tasks | [start-services](../tasks/start-services.md) |
-| 7 | install | 2 tasks | [install](../tasks/install.md) |
-| 8 | test-backend | 1 tasks | [test-backend](../tasks/test-backend.md) |
-| 9 | lint-backend | 1 tasks | [lint-backend](../tasks/lint-backend.md) |
-| 10 | test-e2e | 1 tasks | [test-e2e](../tasks/test-e2e.md) |
-| 11 | test-frontend | 1 tasks | [test-frontend](../tasks/test-frontend.md) |
-| 12 | test-integration | 1 tasks | [test-integration](../tasks/test-integration.md) |
-| 13 | build-frontend | 1 tasks | [build-frontend](../tasks/build-frontend.md) |
-| 14 | build-backend | 1 tasks | [build-backend](../tasks/build-backend.md) |
-| 15 | lint-frontend | 1 tasks | [lint-frontend](../tasks/lint-frontend.md) |
+| 4 | start-services | 2 tasks | [start-services](../tasks/start-services.md) |
+| 5 | install | 2 tasks | [install](../tasks/install.md) |
+| 6 | build | 2 tasks | [build](../tasks/build.md) |
+| 7 | test | 2 tasks | [test](../tasks/test.md) |
+| 8 | build-backend | 1 tasks | [build-backend](../tasks/build-backend.md) |
+| 9 | test-e2e | 1 tasks | [test-e2e](../tasks/test-e2e.md) |
+| 10 | test-frontend | 1 tasks | [test-frontend](../tasks/test-frontend.md) |
+| 11 | build-frontend | 1 tasks | [build-frontend](../tasks/build-frontend.md) |
+| 12 | test-backend | 1 tasks | [test-backend](../tasks/test-backend.md) |
+| 13 | lint-frontend | 1 tasks | [lint-frontend](../tasks/lint-frontend.md) |
+| 14 | lint-backend | 1 tasks | [lint-backend](../tasks/lint-backend.md) |
+| 15 | test-integration | 1 tasks | [test-integration](../tasks/test-integration.md) |
 
 ## Task Dependencies
 

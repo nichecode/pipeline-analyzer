@@ -16,8 +16,6 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
 ```bash
 cd api && python -m pytest tests/
 ```

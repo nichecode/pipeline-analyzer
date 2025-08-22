@@ -16,8 +16,7 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 npm run test:load
 ```
@@ -27,8 +26,7 @@ npm run test:load
 - **Risk level:** low
 - **Tools:** npm
 
-### Command 2
-
+**Command 2:**
 ```bash
 npx lhci autorun --config=.lighthouserc.json
 ```

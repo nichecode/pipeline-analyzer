@@ -17,8 +17,6 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
 ```bash
 kubectl apply -f k8s/staging/ --context=staging-cluster
 ```

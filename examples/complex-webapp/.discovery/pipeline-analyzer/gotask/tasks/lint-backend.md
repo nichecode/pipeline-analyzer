@@ -16,8 +16,7 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 cd api && flake8 .
 ```
@@ -27,8 +26,7 @@ cd api && flake8 .
 - **Risk level:** low
 - **Tools:** shell
 
-### Command 2
-
+**Command 2:**
 ```bash
 cd api && black --check .
 ```
@@ -38,8 +36,7 @@ cd api && black --check .
 - **Risk level:** low
 - **Tools:** shell
 
-### Command 3
-
+**Command 3:**
 ```bash
 cd api && mypy .
 ```

@@ -16,8 +16,7 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 npm audit --audit-level=moderate
 ```
@@ -27,8 +26,7 @@ npm audit --audit-level=moderate
 - **Risk level:** low
 - **Tools:** npm
 
-### Command 2
-
+**Command 2:**
 ```bash
 if [ -n "$SNYK_TOKEN" ]; then npx snyk test; fi
 ```
@@ -38,8 +36,7 @@ if [ -n "$SNYK_TOKEN" ]; then npx snyk test; fi
 - **Risk level:** low
 - **Tools:** shell
 
-### Command 3
-
+**Command 3:**
 ```bash
 trivy image complex-webapp-frontend:latest
 ```
@@ -49,8 +46,7 @@ trivy image complex-webapp-frontend:latest
 - **Risk level:** low
 - **Tools:** shell
 
-### Command 4
-
+**Command 4:**
 ```bash
 trivy image complex-webapp-backend:latest
 ```

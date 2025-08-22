@@ -1,12 +1,13 @@
 # CircleCI Analysis Report
 
-**Generated:** 2025-08-21T11:42:35+01:00
+**Generated:** 2025-08-22T11:33:58+01:00
 **Config:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/.circleci/config.yml
 
 ## 📊 Overview
 
 - **Unique jobs:** 13
-- **Workflows:** nightly-full-test, weekly-security, build-test-deploy
+- **Reusable commands:** 4
+- **Workflows:** weekly-security, build-test-deploy, nightly-full-test
 
 ## 🚀 Quick Start
 
@@ -32,6 +33,14 @@ Individual job analysis with run commands and configuration:
 - [jobs/test-frontend.md](jobs/test-frontend.md)
 - [jobs/test-integration.md](jobs/test-integration.md)
 - [jobs/test-performance.md](jobs/test-performance.md)
+
+### Reusable Commands
+Reusable command definitions with analysis and usage patterns:
+
+- [commands/install-dependencies.md](commands/install-dependencies.md)
+- [commands/notify-slack-on-failure.md](commands/notify-slack-on-failure.md)
+- [commands/restore-npm-cache.md](commands/restore-npm-cache.md)
+- [commands/save-npm-cache.md](commands/save-npm-cache.md)
 
 ### Workflows
 Workflow structure and job dependencies:
@@ -61,12 +70,12 @@ Workflow structure and job dependencies:
 | Job | Usage Count | Link |
 |-----|-------------|------|
 | security-scan | 3 | [View Details](jobs/security-scan.md) |
-| test-e2e | 2 | [View Details](jobs/test-e2e.md) |
 | test-performance | 2 | [View Details](jobs/test-performance.md) |
-| test-backend | 1 | [View Details](jobs/test-backend.md) |
+| test-e2e | 2 | [View Details](jobs/test-e2e.md) |
+| test-integration | 1 | [View Details](jobs/test-integration.md) |
 | build-docker-images | 1 | [View Details](jobs/build-docker-images.md) |
-| build-frontend | 1 | [View Details](jobs/build-frontend.md) |
-| test-frontend | 1 | [View Details](jobs/test-frontend.md) |
+| lint-backend | 1 | [View Details](jobs/lint-backend.md) |
+| test-backend | 1 | [View Details](jobs/test-backend.md) |
+| deploy-staging | 1 | [View Details](jobs/deploy-staging.md) |
 | hold-for-approval | 1 | [View Details](jobs/hold-for-approval.md) |
 | deploy-production | 1 | [View Details](jobs/deploy-production.md) |
-| lint-frontend | 1 | [View Details](jobs/lint-frontend.md) |

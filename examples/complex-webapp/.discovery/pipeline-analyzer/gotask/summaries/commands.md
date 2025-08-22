@@ -6,8 +6,8 @@
 |---------|-------------|-------------|-----------|
 | npm | 11 | 9 | package-management |
 | docker-compose | 6 | 5 | containerization |
-| docker | 3 | 2 | containerization |
 | python | 3 | 3 | runtime |
+| docker | 3 | 2 | containerization |
 | kubectl | 2 | 2 | deployment |
 | pip | 2 | 1 | package-management |
 
@@ -24,9 +24,9 @@
 | `echo` | 2 | Shell command |
 | `kubectl` | 2 | Shell command |
 | `pip` | 2 | Shell command |
+| `if` | 1 | Shell command |
 | `npx` | 1 | Shell command |
 | `sleep` | 1 | Shell command |
-| `if` | 1 | Shell command |
 
 ## 🛠️ Tool Ecosystem
 

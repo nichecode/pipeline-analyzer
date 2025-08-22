@@ -10,8 +10,7 @@
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 rm -rf dist/
 ```
@@ -21,8 +20,7 @@ rm -rf dist/
 - **Risk level:** high
 - **Tools:** shell
 
-### Command 2
-
+**Command 2:**
 ```bash
 rm -rf node_modules/
 ```
@@ -32,8 +30,7 @@ rm -rf node_modules/
 - **Risk level:** high
 - **Tools:** shell
 
-### Command 3
-
+**Command 3:**
 ```bash
 rm -rf api/dist/
 ```
@@ -43,8 +40,7 @@ rm -rf api/dist/
 - **Risk level:** high
 - **Tools:** shell
 
-### Command 4
-
+**Command 4:**
 ```bash
 docker-compose down --volumes --remove-orphans
 ```
@@ -54,8 +50,7 @@ docker-compose down --volumes --remove-orphans
 - **Risk level:** low
 - **Tools:** docker-compose
 
-### Command 5
-
+**Command 5:**
 ```bash
 docker image prune -f
 ```

@@ -10,8 +10,6 @@
 
 ## ⚡ Commands
 
-### Command 1
-
 ```bash
 docker-compose down
 ```

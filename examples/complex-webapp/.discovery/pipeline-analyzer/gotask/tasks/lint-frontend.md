@@ -16,8 +16,7 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 npm run lint
 ```
@@ -27,8 +26,7 @@ npm run lint
 - **Risk level:** low
 - **Tools:** npm
 
-### Command 2
-
+**Command 2:**
 ```bash
 npm run lint:css
 ```
@@ -38,8 +36,7 @@ npm run lint:css
 - **Risk level:** low
 - **Tools:** npm
 
-### Command 3
-
+**Command 3:**
 ```bash
 npm run format:check
 ```

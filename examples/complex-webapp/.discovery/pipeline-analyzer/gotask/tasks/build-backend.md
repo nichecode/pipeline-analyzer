@@ -25,8 +25,6 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
 ```bash
 cd api && python setup.py sdist bdist_wheel
 ```

@@ -17,8 +17,6 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
 ```bash
 npm run test:e2e
 ```

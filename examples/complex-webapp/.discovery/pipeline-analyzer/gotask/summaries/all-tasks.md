@@ -34,17 +34,11 @@ Total tasks found: **23**
 
 - [clean](../tasks/clean.md)
 
-### Quality (3 tasks)
+### Setup (3 tasks)
 
-- [lint](../tasks/lint.md)
-- [lint-backend](../tasks/lint-backend.md)
-- [lint-frontend](../tasks/lint-frontend.md)
-
-### Containerization (3 tasks)
-
-- [dev](../tasks/dev.md)
-- [start-services](../tasks/start-services.md)
-- [stop-services](../tasks/stop-services.md)
+- [install](../tasks/install.md)
+- [install-backend](../tasks/install-backend.md)
+- [install-frontend](../tasks/install-frontend.md)
 
 ### Test (6 tasks)
 
@@ -55,15 +49,22 @@ Total tasks found: **23**
 - [test-frontend](../tasks/test-frontend.md)
 - [test-integration](../tasks/test-integration.md)
 
-### Utility (1 tasks)
+### Deploy (2 tasks)
 
-- [security-scan](../tasks/security-scan.md)
+- [deploy-prod](../tasks/deploy-prod.md)
+- [deploy-staging](../tasks/deploy-staging.md)
 
-### Setup (3 tasks)
+### Containerization (3 tasks)
 
-- [install](../tasks/install.md)
-- [install-backend](../tasks/install-backend.md)
-- [install-frontend](../tasks/install-frontend.md)
+- [dev](../tasks/dev.md)
+- [start-services](../tasks/start-services.md)
+- [stop-services](../tasks/stop-services.md)
+
+### Quality (3 tasks)
+
+- [lint](../tasks/lint.md)
+- [lint-backend](../tasks/lint-backend.md)
+- [lint-frontend](../tasks/lint-frontend.md)
 
 ### Build (4 tasks)
 
@@ -72,10 +73,9 @@ Total tasks found: **23**
 - [build-docker](../tasks/build-docker.md)
 - [build-frontend](../tasks/build-frontend.md)
 
-### Deploy (2 tasks)
+### Utility (1 tasks)
 
-- [deploy-prod](../tasks/deploy-prod.md)
-- [deploy-staging](../tasks/deploy-staging.md)
+- [security-scan](../tasks/security-scan.md)
 
 ## Navigation
 

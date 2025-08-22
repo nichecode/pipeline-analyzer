@@ -16,8 +16,7 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 docker-compose up -d postgres redis
 ```
@@ -27,8 +26,7 @@ docker-compose up -d postgres redis
 - **Risk level:** low
 - **Tools:** docker-compose
 
-### Command 2
-
+**Command 2:**
 ```bash
 sleep 10
 ```
@@ -38,8 +36,7 @@ sleep 10
 - **Risk level:** low
 - **Tools:** shell
 
-### Command 3
-
+**Command 3:**
 ```bash
 npm run test:integration
 ```
@@ -49,8 +46,7 @@ npm run test:integration
 - **Risk level:** low
 - **Tools:** npm
 
-### Command 4
-
+**Command 4:**
 ```bash
 docker-compose down
 ```

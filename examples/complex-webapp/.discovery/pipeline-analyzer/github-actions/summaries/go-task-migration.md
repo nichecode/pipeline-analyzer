@@ -42,16 +42,16 @@ tasks:
 ### 1. Analyze Current Commands
 Found **14 unique commands** across your workflows:
 
-- `npm ci`
-- `npm run build:prod`
-- `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
-- `docker build -t webapp-backend:${{ github.sha }} -f docker/backend/Dockerfile .`
 - `npm audit --audit-level=moderate`
-- `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \`
-- `pip install -r api/requirements.txt`
-- `pip install -r api/requirements-dev.txt`
-- `aquasec/trivy image webapp-frontend:${{ github.sha }}`
 - `echo "Deploying to staging..."`
+- `pip install -r api/requirements.txt`
+- `cd api`
+- `npm run build:prod`
+- `docker build -t webapp-backend:${{ github.sha }} -f docker/backend/Dockerfile .`
+- `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \`
+- `aquasec/trivy image webapp-frontend:${{ github.sha }}`
+- `npm ci`
+- `npm run lint`
 - ... and 4 more
 
 ### 2. Create Taskfile.yml

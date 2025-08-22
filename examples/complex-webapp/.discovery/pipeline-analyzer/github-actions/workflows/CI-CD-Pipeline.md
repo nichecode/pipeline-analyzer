@@ -1,7 +1,7 @@
 # Workflow: CI/CD Pipeline
 
 **File:** ci.yml  
-**Generated:** 2025-08-21T11:42:35+01:00
+**Generated:** 2025-08-22T11:33:58+01:00
 
 ## 📊 Overview
 
@@ -20,19 +20,22 @@
 
 | Job | Runner | Steps | Commands | Actions |
 |-----|--------|-------|----------|---------|
+| [test-frontend](../jobs/test-frontend.md) | ubuntu-latest | 6 | 3 | 3 |
 | [test-backend](../jobs/test-backend.md) | ubuntu-latest | 4 | 4 | 2 |
 | [build-and-deploy](../jobs/build-and-deploy.md) | ubuntu-latest | 6 | 8 | 2 |
-| [test-frontend](../jobs/test-frontend.md) | ubuntu-latest | 6 | 3 | 3 |
 
 ## ⚡ Command Patterns Detected
 
 These command patterns are good candidates for go-task consolidation:
 
-### docker (3 commands)
+### npm (6 commands)
 
-- `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
-- `docker build -t webapp-backend:${{ github.sha }} -f docker/backend/Dockerfile .`
-- `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \`
+- `npm ci`
+- `npm run lint`
+- `npm run test:coverage`
+- `npm ci`
+- `npm run build:prod`
+- `npm audit --audit-level=moderate`
 
 ### pip (2 commands)
 
@@ -49,14 +52,11 @@ These command patterns are good candidates for go-task consolidation:
 
 - `python -m pytest tests/ --cov=. --cov-report=xml`
 
-### npm (6 commands)
+### docker (3 commands)
 
-- `npm ci`
-- `npm run build:prod`
-- `npm audit --audit-level=moderate`
-- `npm ci`
-- `npm run lint`
-- `npm run test:coverage`
+- `docker build -t webapp-frontend:${{ github.sha }} -f docker/frontend/Dockerfile .`
+- `docker build -t webapp-backend:${{ github.sha }} -f docker/backend/Dockerfile .`
+- `docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \`
 
 
 ## 🔍 Navigation

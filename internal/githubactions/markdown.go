@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/nichecode/pipeline-analyzer/internal/shared"
 )
 
 // MarkdownGenerator generates markdown documentation for GitHub Actions
@@ -38,7 +40,17 @@ func (g *MarkdownGenerator) GenerateMainReadme(results []*AnalysisResult, config
 - **Total jobs:** %d  
 - **Total steps:** %d
 
-## 🚀 Quick Start for go-task Migration
+`, time.Now().Format(time.RFC3339), configPath, totalWorkflows, totalJobs, totalSteps)
+
+	// Add workflow diagram
+	diagram := generateWorkflowDiagram(results)
+	if diagram != "" {
+		content += "## 📊 Workflow Overview\n\n"
+		content += diagram
+		content += "\n"
+	}
+
+	content += `## 🚀 Quick Start for go-task Migration
 
 1. **[🔄 go-task Migration Guide](summaries/go-task-migration.md)** - Convert workflows to go-task
 2. **[🛠️ Actions Usage](summaries/actions-usage.md)** - Actions used across workflows
@@ -49,7 +61,7 @@ func (g *MarkdownGenerator) GenerateMainReadme(results []*AnalysisResult, config
 ### Workflows
 Individual workflow analysis:
 
-`, time.Now().Format(time.RFC3339), configPath, totalWorkflows, totalJobs, totalSteps)
+`
 
 	// List workflow files
 	for _, result := range results {
@@ -650,6 +662,48 @@ task test
 `
 
 	return content
+}
+
+// generateWorkflowDiagram creates a simple Mermaid diagram for GitHub Actions workflows
+func generateWorkflowDiagram(results []*AnalysisResult) string {
+	if len(results) == 0 {
+		return ""
+	}
+	
+	diagram := &shared.MermaidDiagram{
+		Title: "GitHub Actions Workflows",
+	}
+	
+	// Process each workflow (limit to first workflow for simplicity)
+	result := results[0]
+	
+	// Create nodes for jobs
+	for _, job := range result.Jobs {
+		commands := job.RunCommands
+		if len(commands) > 5 {
+			commands = commands[:5]
+		}
+		
+		node := shared.MermaidNode{
+			ID:          shared.CleanNodeID(job.Name),
+			Label:       job.Name,
+			Description: fmt.Sprintf("Runner: %s", job.Runner),
+			Commands:    commands,
+			NodeType:    shared.ClassifyNodeType(job.Name, commands),
+		}
+		diagram.Nodes = append(diagram.Nodes, node)
+	}
+	
+	// Add simple sequential flow for jobs (GitHub Actions job dependencies are complex)
+	for i := 0; i < len(diagram.Nodes)-1; i++ {
+		edge := shared.MermaidEdge{
+			From: diagram.Nodes[i].ID,
+			To:   diagram.Nodes[i+1].ID,
+		}
+		diagram.Edges = append(diagram.Edges, edge)
+	}
+	
+	return diagram.Generate()
 }
 
 // sanitizeTaskName creates a valid go-task name

@@ -16,8 +16,7 @@
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 pip install -r api/requirements.txt
 ```
@@ -27,8 +26,7 @@ pip install -r api/requirements.txt
 - **Risk level:** low
 - **Tools:** pip
 
-### Command 2
-
+**Command 2:**
 ```bash
 pip install -r api/requirements-dev.txt
 ```

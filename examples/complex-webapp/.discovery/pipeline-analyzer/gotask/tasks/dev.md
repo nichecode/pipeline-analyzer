@@ -16,8 +16,7 @@ This task depends on:
 
 ## ⚡ Commands
 
-### Command 1
-
+**Command 1:**
 ```bash
 docker-compose up -d postgres redis
 ```
@@ -27,8 +26,7 @@ docker-compose up -d postgres redis
 - **Risk level:** low
 - **Tools:** docker-compose
 
-### Command 2
-
+**Command 2:**
 ```bash
 npm run start &
 ```
@@ -38,8 +36,7 @@ npm run start &
 - **Risk level:** low
 - **Tools:** npm
 
-### Command 3
-
+**Command 3:**
 ```bash
 cd api && python manage.py runserver &
 ```
@@ -49,8 +46,7 @@ cd api && python manage.py runserver &
 - **Risk level:** low
 - **Tools:** python
 
-### Command 4
-
+**Command 4:**
 ```bash
 echo "Frontend http://localhost:3000"
 ```
@@ -60,8 +56,7 @@ echo "Frontend http://localhost:3000"
 - **Risk level:** low
 - **Tools:** shell
 
-### Command 5
-
+**Command 5:**
 ```bash
 echo "Backend http://localhost:8000"
 ```

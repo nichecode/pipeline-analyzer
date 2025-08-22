@@ -1,6 +1,6 @@
 # Go-Task Analysis Report
 
-**Generated:** 2025-08-21T11:42:35+01:00
+**Generated:** 2025-08-22T11:33:58+01:00
 **Taskfile:** /Users/nicholas/Projects/pipeline-analyzer/examples/complex-webapp/Taskfile.yml
 
 ## 📊 Overview
@@ -10,6 +10,59 @@
 - **Circular Dependencies:** None ✅
 - **Critical Path Length:** 7 tasks
 - **Tasks with Caching:** 3/23 (13.0%)
+
+## 📊 Workflow Overview
+
+```mermaid
+flowchart TD
+    INSTALL_FRONTEND["`**install-frontend**
+Install frontend dependencies
+• npm install
+`"]
+    STOP_SERVICES["`**stop-services**
+Stop all services
+• docker-compose down
+`"]
+    TEST["`**test**
+Run all tests
+`"]
+    BUILD["`**build**
+Build all components
+`"]
+    INSTALL_BACKEND["`**install-backend**
+Install backend dependencies
+• pip install -r api/requirements.txt
+• pip install -r api/requirements-dev.txt
+`"]
+    CLEAN["`**clean**
+Clean all build artifacts
+• rm -rf dist/
+• rm -rf node_modules/
+• rm -rf api/dist/
+• ... (2 more)
+`"]
+    DEV["`**dev**
+Start development environment
+• docker-compose up -d postgres redis
+• npm run start &
+• cd api && python manage.py runserver &
+• ... (2 more)
+`"]
+
+    classDef workflow fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef setup fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef test fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef build fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef deploy fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef utility fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    class INSTALL_FRONTEND setup
+    class STOP_SERVICES utility
+    class TEST test
+    class BUILD build
+    class INSTALL_BACKEND setup
+    class CLEAN setup
+    class DEV utility
+```
 
 ## 🚀 Quick Start
 
@@ -67,16 +120,16 @@ Analysis of included Taskfiles:
 
 | Task | Used By | Link |
 |------|---------|------|
-| install-frontend | 4 tasks | [View](tasks/install-frontend.md) |
 | install-backend | 4 tasks | [View](tasks/install-backend.md) |
+| install-frontend | 4 tasks | [View](tasks/install-frontend.md) |
 | build-docker | 4 tasks | [View](tasks/build-docker.md) |
-| build | 2 tasks | [View](tasks/build.md) |
 | test | 2 tasks | [View](tasks/test.md) |
+| build | 2 tasks | [View](tasks/build.md) |
 
 ### Top Optimization Opportunities
 
-- ⚠️ **deploy-prod**: Task could benefit from caching optimization
 - ⚠️ **security-scan**: Task could benefit from caching optimization
+- ⚠️ **build-docker**: Task could benefit from caching optimization
 - ⚠️ **performance-test**: Task could benefit from caching optimization
 
 ### Primary Tool Ecosystem: **Docker**

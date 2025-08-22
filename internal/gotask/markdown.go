@@ -40,6 +40,14 @@ func GenerateMainReadme(analysis *Analysis, taskfilePath string) string {
 	
 	sb.WriteString("\n")
 
+	// Workflow diagram
+	diagram := GenerateTaskflowDiagram(analysis)
+	if diagram != "" {
+		sb.WriteString("## 📊 Workflow Overview\n\n")
+		sb.WriteString(diagram)
+		sb.WriteString("\n")
+	}
+
 	// Quick Start section
 	sb.WriteString("## 🚀 Quick Start\n\n")
 	sb.WriteString("1. **[📋 Optimization Guide](optimization-guide.md)** - Performance improvement recommendations\n")
@@ -587,4 +595,79 @@ func GenerateDependencyGraph(analysis *Analysis) string {
 	sb.WriteString("- [Optimization Guide](../optimization-guide.md)\n")
 
 	return sb.String()
+}
+
+// GenerateTaskflowDiagram creates a simple Mermaid diagram of the main task flow
+func GenerateTaskflowDiagram(analysis *Analysis) string {
+	diagram := &shared.MermaidDiagram{
+		Title: "Go-Task Workflow",
+	}
+	
+	// Find main/common entry point tasks
+	mainTasks := []string{}
+	for taskName, task := range analysis.Taskfile.Tasks {
+		// Look for common entry points
+		if taskName == "default" || taskName == "build" || taskName == "test" || 
+		   taskName == "dev" || taskName == "start" || taskName == "deploy" {
+			mainTasks = append(mainTasks, taskName)
+		} else if len(task.Deps) == 0 && len(task.Cmds) > 0 {
+			// Tasks with no deps that have commands might be entry points
+			mainTasks = append(mainTasks, taskName)
+		}
+	}
+	
+	// Limit to 8 tasks for readability
+	if len(mainTasks) > 8 {
+		mainTasks = mainTasks[:8]
+	}
+	
+	// Create nodes
+	for _, taskName := range mainTasks {
+		if task, exists := analysis.Taskfile.Tasks[taskName]; exists {
+			commands := ExtractTaskCommands(task)
+			
+			node := shared.MermaidNode{
+				ID:          shared.CleanNodeID(taskName),
+				Label:       taskName,
+				Description: task.Desc,
+				Commands:    commands,
+				NodeType:    shared.ClassifyNodeType(taskName, commands),
+			}
+			diagram.Nodes = append(diagram.Nodes, node)
+			
+			// Add dependency edges
+			for _, dep := range task.Deps {
+				// Handle both string and task object dependencies
+				var depName string
+				if taskDep, ok := dep.(map[string]interface{}); ok {
+					if task, exists := taskDep["task"]; exists {
+						depName = task.(string)
+					}
+				} else if str, ok := dep.(string); ok {
+					depName = str
+				}
+				
+				if depName != "" {
+					// Only add if dependency is in our main tasks
+					for _, mainTask := range mainTasks {
+						if mainTask == depName {
+							edge := shared.MermaidEdge{
+								From: shared.CleanNodeID(depName),
+								To:   shared.CleanNodeID(taskName),
+							}
+							diagram.Edges = append(diagram.Edges, edge)
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	// Only generate diagram if we have tasks
+	if len(diagram.Nodes) == 0 {
+		return ""
+	}
+	
+	return diagram.Generate()
 }

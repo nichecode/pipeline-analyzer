@@ -19,8 +19,6 @@
 
 ## ⚡ Commands
 
-### Command 1
-
 ```bash
 npm install
 ```
